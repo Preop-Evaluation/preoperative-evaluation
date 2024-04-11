@@ -12,9 +12,7 @@ def questionnaire_page():
     if current_user.med_history_updated:
         latest_responses = None
         if current_user.autofill_enabled:
-            latest_responses = get_latest_questionnaire(current_user.id).responses
-            print(latest_responses)
-        
+            latest_responses = get_latest_questionnaire(current_user.id).responses                    
         return render_template('questionnaire_form.html', questions=questions, latest_responses=latest_responses)
     else:        
         return redirect(url_for('patient_views.patient_profile_page'))
