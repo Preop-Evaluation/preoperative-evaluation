@@ -10,7 +10,8 @@ from App.config import load_config
 
 from App.controllers import (
     setup_jwt,
-    add_auth_context
+    add_auth_context,
+    setup_flask_login
 )
 
 from App.views import views
@@ -29,6 +30,7 @@ def create_app(overrides={}):
     add_views(app)
     init_db(app)
     jwt = setup_jwt(app)
+    setup_flask_login(app)
     
     @jwt.invalid_token_loader
     @jwt.unauthorized_loader
@@ -37,4 +39,3 @@ def create_app(overrides={}):
     
     app.app_context().push()
     return app
-

@@ -1,6 +1,11 @@
-from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify
+from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, url_for, flash, session
+from werkzeug.utils import secure_filename
+from collections import defaultdict
+import os
+from datetime import datetime
+from App.models import Patient, Anesthesiologist, Doctor
 from App.models import db
-from App.controllers import create_user
+from App.controllers import *
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -11,10 +16,11 @@ def index_page():
 @index_views.route('/init', methods=['GET'])
 def init():
     db.drop_all()
-    db.create_all()
-    create_user('bob', 'bobpass')
+    db.create_all()    
     return jsonify(message='db initialized!')
 
 @index_views.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status':'healthy'})
+
+
