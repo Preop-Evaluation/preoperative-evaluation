@@ -46,7 +46,7 @@ def update_questionnaire_anesthesiologist_action(questionnaire_id):
     print(questionnaire_id, status, notes)
 
     if update_questionnaire_anesthesiologist(current_user.id, questionnaire_id, notes, status):
-        flash('Comments added successfully')
+        flash('Notes added successfully')
     else:
         flash('Error adding notes')
     return redirect(request.referrer)

@@ -47,7 +47,7 @@ def update_questionnaire_doctor_action(questionnaire_id):
     print(questionnaire_id, operation_date, notes)
     
     if update_questionnaire_doctor(current_user.id, questionnaire_id, notes, operation_date):
-        flash('Questionnaire updated successfully')
+        flash('Notes added successfully')
     else:
-        flash('Error adding comments')
+        flash('Error adding notes')
     return redirect(request.referrer)

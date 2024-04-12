@@ -66,7 +66,7 @@ def signup_action():
 
     if patient:
       flash('Account Created!')  
-      return redirect("/") 
+      return redirect("/patient/profile") 
 
   except Exception as e:      
     print("Error in signup: ", e)
