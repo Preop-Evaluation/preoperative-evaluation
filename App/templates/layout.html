@@ -29,14 +29,14 @@
          background-color: #0000ff; 
          }
 
-
+         {% block styles %}{% endblock %}
     </style>
     <!-- Additional styles can be included in child templates -->
    
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+    <nav class="navbar navbar-dark navbar-expand-md fixed-top" >
         <a class="navbar-brand" href="/">Preoperative Evaluation</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
             aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">

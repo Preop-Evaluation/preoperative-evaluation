@@ -49,6 +49,8 @@ def submit_questionnaire():
                 if follow_up_id in request.form:
                     responses[follow_up['id']] = request.form[follow_up_id]
 
+    
+
     # Save the responses to the database
     questionnaire = create_questionnaire(patient_id=current_user.id, responses=responses)
     if questionnaire:
@@ -57,4 +59,4 @@ def submit_questionnaire():
         flash('Error submitting questionnaire!')
 
     return render_template('questionnaire_view.html', questions=questions,  questionnaire=questionnaire)
-    # return jsonify(responses), 200
+    #return jsonify(responses), 200

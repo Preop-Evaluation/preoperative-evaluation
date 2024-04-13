@@ -51,7 +51,7 @@ def get_patient_notifications(patient_id):
 
         time_ago = (datetime.now() - notification.timestamp).total_seconds()
         if time_ago < 60:
-            info['time_ago'] = f"{int(time_ago)} s"
+            info['time_ago'] = f"{int(time_ago)}s"
         elif time_ago < 3600:
             info['time_ago'] = f"{int(time_ago // 60)}m"
         elif time_ago < 86400:
