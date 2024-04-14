@@ -19,7 +19,7 @@ def update_questionnaire_doctor(doctor_id, questionnaire_id, new_doctor_notes, n
     if doctor:        
         questionnaire = doctor.update_questionnaire_doctor(questionnaire_id, new_doctor_notes, new_operation_date)
         if questionnaire:
-            notification = create_notification(questionnaire.patient_id, f"Doctor {doctor.lastname} has updated your questionnaire", "Questionnaire Updated")
+            notification = create_notification(questionnaire.patient_id, f"Doctor {doctor.lastname} has reviewed your questionnaire", "Questionnaire Updated")
             return True
         else:
             return False

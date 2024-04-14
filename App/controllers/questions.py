@@ -1,78 +1,74 @@
 def get_default_questionnaire():
     default_questions = [
         {
-            "id": "q1",
+            "id": "q0",
             "text": "Please describe your current health condition.",
             "type": "long_answer",
             "follow_ups": []
         },
         {
-            "id": "q2",
-            "text": "Do you have any allergies?",
-            "type": "multiple_choice",
-            "choices": ["None", "Peanuts", "Shellfish", "Pollen", "Other"],
+            "id": "q1",
+            "text": "Do you have Diabetes (Sugar)?",
+            "type": "boolean",
             "follow_ups": [
                 {
                     "id": "q2a",
-                    "text": "Please specify your other allergies.",
+                    "text": "For how long?",
                     "type": "long_answer",
                     "conditional_on": "Other"
                 }
             ]
         },
         {
+            "id": "q2",
+            "text": "Is your condition managed (treated) [controlled] by Diet / Tablets / Insulin",
+            "type": "multiple_choice",
+            "choices": ["Diet", "Tablets", "Insulin"],
+        },
+        {
             "id": "q3",
-            "text": "Are you currently taking any medication?",
-            "type": "boolean",
-            "follow_ups": [
-                {
-                    "id": "q3a",
-                    "text": "Please list the medications you are taking.",
-                    "type": "long_answer",
-                    "conditional_on": True
-                }
-            ]
+            "text": "What medication are you on?",
+            "type": "long_answer",
         },
         {
             "id": "q4",
-            "text": "Have you had any recent infections or illnesses?",
+            "text": "Do you have hypertension (high blood pressure)?",
             "type": "boolean",
             "follow_ups": [
                 {
                     "id": "q4a",
-                    "text": "Please list them: ",
+                    "text": "Is your condition managed (treated) [controlled] by Diet / Tablets ",
                     "type": "long_answer",
-                    "conditional_on": True
+                    "conditional_on": True,
                 }
             ]
         },
           {
             "id": "q5",
-            "text": "Do you have a history of substance abuse or addiction?",
-            "type": "boolean",
-            "follow_ups": []
+            "text": "What medication are you on for the hypertension?",
+            "type": "long_answer",
+            "conditional_on": True
         },
         {
             "id": "q6",
-            "text": "Do you consume alcohol or recreational drugs?",
+            "text": "Do you have high cholesterol?",
             "type": "boolean",
             "follow_ups": [
                 {
                     "id": "q6a",
-                    "text": "How often: ",
-                    "type": "long_answer",
-                    "conditional_on": True
+                    "text": "Are you on medication?",
+                    "type": "boolean",
                 }
             ]
         },
         {
             "id": "q7",
-            "text": "Do you smoke or use tobacco products?",
+            "text": "Have you ever had a myocardial infarction (heart attack)?",
             "type": "boolean",
             "follow_ups": [
                 {
                     "id": "q7a",
-                    "text": "How often: ",
+                    "text": "How long ago?",
                     "type": "long_answer",
                     "conditional_on": True
                 }
@@ -80,68 +76,45 @@ def get_default_questionnaire():
         },
         {
             "id": "q8",
-            "text": "Have you had a cough or cold in the last 3 weeks? ",
+            "text": "Do you have ischaemic heart disease (angina)?",
             "type": "boolean",
-            "follow_ups": []
+            "follow_ups": [
+                {
+                    "id": "q8a",
+                    "text": "For how long?",
+                    "type": "long_answer",
+                    "conditional_on": True
+                }
+            ]
     
         },
          {
             "id": "q9",
-            "text": "Have you had an operation before?",
+            "text": "Did you ever have a stroke or TIA?",
             "type": "boolean",
             "follow_ups": [
                 {
-                    "id": "q9a",
-                    "text": "Last time: ",
-                    "type": "long_answer",
-                    "conditional_on": True
+                "id": "q9a",
+                "text": "How long?",
+                "type": "long_answer",
+                "conditional_on": True
                 }
+
             ]
         },
          {
             "id": "q10",
-            "text": "Do you have recent heartburn or acid reflux? ",
+            "text": "Do you have heart failure? ",
             "type": "boolean",
             "follow_ups": [
                 {
                     "id": "q10a",
-                    "text": "Last time: ",
+                    "text": "How long? ",
                     "type": "long_answer",
                     "conditional_on": True
                 }
             ]
-        },
-         {
-            "id": "q11",
-            "text": "Do you wake up at night short of breath? ",
-            "type": "boolean",
-            "follow_ups": []
-         },   
-         {
-            "id": "q12",
-            "text": "Are you on dialysis?  ",
-            "type": "boolean",
-            "follow_ups": []
-         },   
-         {
-            "id": "q13",
-            "text": "Do you have epilepsy (fits)?",
-            "type": "boolean",
-            "follow_ups": [
-                {
-                    "id": "q13a",
-                    "text": "Last time: ",
-                    "type": "long_answer",
-                    "conditional_on": True
-                }
-            ]
-        },
-        {
-            "id": "q14",
-            "text": "Additional Notes:",
-            "type": "long_answer",
-            "follow_ups": []
-        }  
+        } 
         
         # Add more default questions as required
     ]

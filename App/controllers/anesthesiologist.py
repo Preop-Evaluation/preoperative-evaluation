@@ -18,7 +18,7 @@ def update_questionnaire_anesthesiologist(anesthesiologist_id, questionnaire_id,
     if anesthesiologist:        
         questionnaire = anesthesiologist.update_questionnaire_anesthesiologist(questionnaire_id, new_anesthesiologist_notes, status)
         if questionnaire:
-            notification = create_notification(questionnaire.patient_id, f"Anesthesiologist {anesthesiologist.lastname} has updated your questionnaire", "Questionnaire Updated")
+            notification = create_notification(questionnaire.patient_id, f"Anesthesiologist {anesthesiologist.lastname} has reviewed your questionnaire", "Questionnaire Updated")
             return True
         else:
             return False
