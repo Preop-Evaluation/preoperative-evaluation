@@ -8,7 +8,7 @@
         {% if latest_responses %}
             {% for question in questions %}
             <div class="mb-3">
-                <label for="question_{{ question.id }}" class="form-label"> question_{{ question.id }}.{{ question.text }}</label>
+                <label for="question_{{ question.id }}" class="form-label">{{ question.text }}</label>
                 {% if question.type == "long_answer" %}
                 <textarea class="form-control" id="question_{{ question.id }}" name="question_{{ question.id }}" rows="3">{{ latest_responses.get(question.id, '') }}</textarea>
                 {% elif question.type == "multiple_choice" %}
