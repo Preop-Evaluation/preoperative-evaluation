@@ -100,6 +100,5 @@ def get_default_questionnaire():
             ]
         } 
         
-        # Add more default questions as required
     ]
     return default_questions
