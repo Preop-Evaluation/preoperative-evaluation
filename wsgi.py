@@ -80,6 +80,82 @@ def create_anesthesiologist_command(firstname, lastname, username, password, ema
     anesthesiologist = create_anesthesiologist(firstname, lastname, username, password, email, phone_number)
     print(f'Anesthesiologist {anesthesiologist.firstname} {anesthesiologist.lastname} created!')
 
+#command to delete a doctor given their username
+@doctor_cli.command("delete", help="Deletes a doctor by username")
+@click.argument("username", type=str)
+def delete_doctor_command(username):
+    if delete_doctor(username):
+        print(f"Doctor with username {username} deleted successfully.")
+    else:
+        print(f"Failed to delete doctor with username {username}.")
+
+#command to delete an anesthesiologist given their username
+@doctor_cli.command("delete_anesthesiologist", help="Deletes an anesthesiologist by username")
+@click.argument("username", type=str)
+def delete_anesthesiologist_command(username):
+    if delete_anesthesiologist(username):
+        print(f"Anesthesiologist with username {username} deleted successfully.")
+    else:
+        print(f"Failed to delete anesthesiologist with username {username}.")
+
+#command to list all medical staff
+@doctor_cli.command("list", help="Lists all medical staff")
+def list_medical_staff():
+    from App.controllers.doctor import get_all_doctors
+    from App.controllers.anesthesiologist import get_all_anesthesiologists
+
+    doctors = get_all_doctors()
+    anesthesiologists = get_all_anesthesiologists()
+    
+    if not doctors and not anesthesiologists:
+        print("No medical staff found.")
+        return
+
+    print("\nMedical Staff List:")
+    print("-" * 40)
+    
+    for doctor in doctors:
+        print(f"ID: {doctor['id']}, Name: {doctor['name']}, Username: {doctor['username']}, Role: {doctor['role']}")
+    
+    for anesthesiologist in anesthesiologists:
+        print(f"ID: {anesthesiologist['id']}, Name: {anesthesiologist['name']}, Username: {anesthesiologist['username']}, Role: {anesthesiologist['role']}")
+
+#command to update a doctor's info
+@doctor_cli.command("update", help="Updates a doctor's information")
+@click.argument("username", type=str)
+@click.option("--firstname", type=str)
+@click.option("--lastname", type=str)
+@click.option("--new_username", type=str)
+@click.option("--password", type=str)
+@click.option("--email", type=str)
+@click.option("--phone_number", type=str)
+def update_doctor_command(username, firstname, lastname, new_username, password, email, phone_number):
+    from App.controllers.doctor import update_doctor
+
+    doctor = update_doctor(username, firstname, lastname, new_username, password, email, phone_number)
+    if doctor:
+        print(f"Doctor '{username}' updated successfully.")
+    else:
+        print(f"Failed to update doctor '{username}'.")
+ 
+#command to update an anesth's info
+@doctor_cli.command("update_anesthesiologist", help="Updates an anesthesiologist's information")
+@click.argument("username", type=str)
+@click.option("--firstname", type=str)
+@click.option("--lastname", type=str)
+@click.option("--new_username", type=str)
+@click.option("--password", type=str)
+@click.option("--email", type=str)
+@click.option("--phone_number", type=str)
+def update_anesthesiologist_command(username, firstname, lastname, new_username, password, email, phone_number):
+    from App.controllers.anesthesiologist import update_anesthesiologist
+
+    anesthesiologist = update_anesthesiologist(username, firstname, lastname, new_username, password, email, phone_number)
+    if anesthesiologist:
+        print(f"Anesthesiologist '{username}' updated successfully.")
+    else:
+        print(f"Failed to update anesthesiologist '{username}'.")
+
 
 app.cli.add_command(doctor_cli)
 
