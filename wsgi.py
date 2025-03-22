@@ -26,20 +26,8 @@ def not_found(e):
 User Commands
 '''
 
-# Commands can be organized using groups
-
-# create a group, it would be the first argument of the comand
-# eg : flask user <command>
 user_cli = AppGroup('user', help='User object commands') 
-
-# Then define the command and any parameters and annotate it with the group (@)
-# @user_cli.command("create", help="Creates a user")
-# @click.argument("username", default="rob")
-# @click.argument("password", default="robpass")
-# def create_user_command(username, password):    
-#     print(f'{username} created!')
-
-# this command will be : flask user create bob bobpass
+doctor_cli = AppGroup('doctor', help='Doctor-related commands')
 
 @user_cli.command("list", help="Lists users in the database")
 @click.argument("format", default="string")
@@ -53,6 +41,8 @@ app.cli.add_command(user_cli) # add the group to the cli
 
 patient_cli = AppGroup('patient', help='Patient object commands')
 
+#command to create a patient
+
 @patient_cli.command("create", help="Creates a patient")
 @click.argument("firstname", default="rob")
 @click.argument("lastname", default="rob")
@@ -65,6 +55,33 @@ def create_patient_command(firstname, lastname, username, password, email, phone
     print(f'{patient.firstname} created!')
 
 app.cli.add_command(patient_cli)
+
+#command to create a doctor
+@doctor_cli.command("create", help="Creates a doctor")
+@click.argument("firstname", default="John")
+@click.argument("lastname", default="Doe")
+@click.argument("username", default="johndoe")
+@click.argument("password", default="password")
+@click.argument("email", default="johndoe@example.com")
+@click.argument("phone_number", default="1234567890")
+def create_doctor_command(firstname, lastname, username, password, email, phone_number):
+    doctor = create_doctor(firstname, lastname, username, password, email, phone_number)
+    print(f'Doctor {doctor.firstname} {doctor.lastname} created!')
+
+#Command to create an anesthesiologist
+@doctor_cli.command("create_anest", help="Creates an anesthesiologist")
+@click.argument("firstname", default="Jane")
+@click.argument("lastname", default="Smith")
+@click.argument("username", default="janesmith")
+@click.argument("password", default="password")
+@click.argument("email", default="janesmith@example.com")
+@click.argument("phone_number", default="9876543210")
+def create_anesthesiologist_command(firstname, lastname, username, password, email, phone_number):
+    anesthesiologist = create_anesthesiologist(firstname, lastname, username, password, email, phone_number)
+    print(f'Anesthesiologist {anesthesiologist.firstname} {anesthesiologist.lastname} created!')
+
+
+app.cli.add_command(doctor_cli)
 
 '''
 Test Commands
