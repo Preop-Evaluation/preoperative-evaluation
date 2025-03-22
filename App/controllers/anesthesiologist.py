@@ -12,6 +12,7 @@ def create_anesthesiologist(firstname, lastname, username, password, email, phon
         print(e, "Error creating anesthesiologist")
         return None
 
+
 def update_questionnaire_anesthesiologist(anesthesiologist_id, questionnaire_id, new_anesthesiologist_notes, status):
     # Verify the anesthesiologist's existence and authority
     anesthesiologist = Anesthesiologist.query.get(anesthesiologist_id)
@@ -24,3 +25,60 @@ def update_questionnaire_anesthesiologist(anesthesiologist_id, questionnaire_id,
             return False
     else:
         return False  # Anesthesiologist not found or not authorized
+
+
+def delete_anesthesiologist(username):
+    try:
+        anesthesiologist = Anesthesiologist.query.filter_by(username=username).first()
+        if not anesthesiologist:
+            print(f"Anesthesiologist with username '{username}' not found.")
+            return False
+
+        db.session.delete(anesthesiologist)
+        db.session.commit()
+        print(f"Anesthesiologist {anesthesiologist.firstname} {anesthesiologist.lastname} deleted successfully.")
+        return True
+    except Exception as e:
+        print(e, "Error deleting anesthesiologist")
+        return False
+
+
+def update_anesthesiologist(username, firstname=None, lastname=None, new_username=None, password=None, email=None, phone_number=None):
+    try:
+        anesthesiologist = Anesthesiologist.query.filter_by(username=username).first()
+        if not anesthesiologist:
+            print(f"Anesthesiologist with username '{username}' not found.")
+            return None
+
+        if firstname:
+            anesthesiologist.firstname = firstname
+        if lastname:
+            anesthesiologist.lastname = lastname
+        if new_username:
+            anesthesiologist.username = new_username
+        if password:
+            anesthesiologist.set_password(password)  # Assuming a hashing method exists
+        if email:
+            anesthesiologist.email = email
+        if phone_number:
+            anesthesiologist.phone_number = phone_number
+
+        db.session.commit()
+        print(f"Anesthesiologist {anesthesiologist.firstname} {anesthesiologist.lastname} updated successfully.")
+        return anesthesiologist
+    except Exception as e:
+        print(e, "Error updating anesthesiologist")
+        return None
+        
+
+def get_all_anesthesiologists():
+    anesthesiologists = Anesthesiologist.query.all()
+    return [
+        {
+            "id": anesthesiologist.id,
+            "name": f"{anesthesiologist.firstname} {anesthesiologist.lastname}",
+            "username": anesthesiologist.username,
+            "role": "Anesthesiologist"
+        }
+        for anesthesiologist in anesthesiologists
+    ]
