@@ -25,3 +25,60 @@ def update_questionnaire_doctor(doctor_id, questionnaire_id, new_doctor_notes, n
             return False
     else:
         return False  # Doctor not found or not authorized
+
+
+def delete_doctor(username):
+    try:
+        doctor = Doctor.query.filter_by(username=username).first()
+        if not doctor:
+            print(f"Doctor with username '{username}' not found.")
+            return False
+
+        db.session.delete(doctor)
+        db.session.commit()
+        print(f"Doctor {doctor.firstname} {doctor.lastname} deleted successfully.")
+        return True
+    except Exception as e:
+        print(e, "Error deleting doctor")
+        return False
+
+
+def update_doctor(username, firstname=None, lastname=None, new_username=None, password=None, email=None, phone_number=None):
+    try:
+        doctor = Doctor.query.filter_by(username=username).first()
+        if not doctor:
+            print(f"Doctor with username '{username}' not found.")
+            return None
+
+        if firstname:
+            doctor.firstname = firstname
+        if lastname:
+            doctor.lastname = lastname
+        if new_username:
+            doctor.username = new_username
+        if password:
+            doctor.set_password(password)  # Assuming a hashing method exists
+        if email:
+            doctor.email = email
+        if phone_number:
+            doctor.phone_number = phone_number
+
+        db.session.commit()
+        print(f"Doctor {doctor.firstname} {doctor.lastname} updated successfully.")
+        return doctor
+    except Exception as e:
+        print(e, "Error updating doctor")
+        return None
+        
+
+def get_all_doctors():
+    doctors = Doctor.query.all()
+    return [
+        {
+            "id": doctor.id,
+            "name": f"{doctor.firstname} {doctor.lastname}",
+            "username": doctor.username,
+            "role": "Doctor"
+        }
+        for doctor in doctors
+    ]
