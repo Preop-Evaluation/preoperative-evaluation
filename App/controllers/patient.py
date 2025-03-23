@@ -45,3 +45,31 @@ def set_patient_autofill_enabled(patient_id, status):
     except Exception as e:
         print(e, "Error setting autofill status")
         return False
+
+
+def update_patient(username, firstname=None, lastname=None, new_username=None, password=None, email=None, phone_number=None):
+    try:
+        patient = Patient.query.filter_by(username=username).first()
+        
+        if not patient:
+            return None  
+        
+        if firstname:
+            patient.firstname = firstname
+        if lastname:
+            patient.lastname = lastname
+        if new_username:
+            patient.username = new_username
+        if password:
+            patient.password = password
+        if email:
+            patient.email = email
+        if phone_number:
+            patient.phone_number = phone_number
+        
+        db.session.commit()
+        print(f"Patient {patient.firstname} {patient.lastname} updated successfully.")
+        return patient
+    
+    except Exception as e:
+        print(f"Error updating patient: {e}")
