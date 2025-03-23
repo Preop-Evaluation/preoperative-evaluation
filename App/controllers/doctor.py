@@ -57,7 +57,7 @@ def update_doctor(username, firstname=None, lastname=None, new_username=None, pa
         if new_username:
             doctor.username = new_username
         if password:
-            doctor.set_password(password)  # Assuming a hashing method exists
+            doctor.set_password(password)  
         if email:
             doctor.email = email
         if phone_number:
