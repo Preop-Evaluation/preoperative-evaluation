@@ -57,7 +57,7 @@ def update_anesthesiologist(username, firstname=None, lastname=None, new_usernam
         if new_username:
             anesthesiologist.username = new_username
         if password:
-            anesthesiologist.set_password(password)  # Assuming a hashing method exists
+            anesthesiologist.set_password(password)  
         if email:
             anesthesiologist.email = email
         if phone_number:
