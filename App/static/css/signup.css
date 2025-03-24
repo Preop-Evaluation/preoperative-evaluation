@@ -1,0 +1,75 @@
+/* Ensure the body takes the full screen and applies the background image */
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+    background-image: url("/static/images/index/frontpage.jpg");
+    background-size: calc(90%); /* Cover the entire screen */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Keep the image fixed while scrolling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Center the login and signup form on the page */
+.container {
+    display: block;
+    justify-content: left;
+    align-items: center;
+    height: 100%;
+}
+
+/* Form card styling */
+.card {
+    background: rgba(255, 255, 255, 0.85); /* Semi-transparent white background */
+    backdrop-filter: blur(5px); /* Glassmorphism effect */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px; /* Limit the width of the card */
+}
+
+/* Form input and button styling */
+.form-control {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Link styling */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Centered text styling */
+.text-center {
+    margin-top: 10px;
+}
+@media (max-width: 576px) {
+    .card {
+        max-width: 100%;
+        padding: 20px; /* Adjust padding for smaller screens */
+    }
+}
