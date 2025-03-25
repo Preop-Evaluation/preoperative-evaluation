@@ -25,21 +25,26 @@ def patient_profile_page():
 Action Routes
 '''
 
-@patient_views.route('/patient/medical_history', methods=['POST'])
-def add_medical_history_action():
-    data = request.form
-    age = data['age']
-    blood_type = data['blood_type']
-    weight = data['weight']
-    height = data['height']
-    allergies = data['allergies']
-    medical_conditions = data['medical_conditions']
-    medication = data['medication']
-    if create_medical_history(current_user.id, age, blood_type, weight, height, allergies, medical_conditions, medication):
-        flash('Medical history added successfully')
-    else:
-        flash('Error adding medical history')
-    return redirect(request.referrer)
+@patient_views.route('/patient/medical_history', methods=['GET', 'POST'])
+def manage_medical_history():
+    if request.method == 'POST':
+        data = request.form
+        age = data['age']
+        blood_type = data['blood_type']
+        weight = data['weight']
+        height = data['height']
+        allergies = data['allergies']
+        medical_conditions = data['medical_conditions']
+        medication = data['medication']
+        
+        if create_medical_history(current_user.id, age, blood_type, weight, height, allergies, medical_conditions, medication):
+            flash('Medical history added successfully')
+        else:
+            flash('Error adding medical history')
+        return redirect(request.referrer)
+    
+    medical_history = get_medical_history(current_user.id)
+    return render_template('patient_account.html', medical_history=medical_history)
 
 
 @patient_views.route('/seen/<notification_id>', methods=['POST'])
