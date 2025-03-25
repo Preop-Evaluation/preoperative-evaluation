@@ -11,8 +11,18 @@ def create_patient(firstname, lastname, username, password, email, phone_number)
         print(e, "Error creating patient")
         return None
     
-def create_medical_history(patient_id,age, blood_type, weight, height, allergies, medical_conditions, medication):
+def create_medical_history(patient_id, age, blood_type, weight, height, allergies, medical_conditions, medication):
     patient = Patient.query.get(patient_id)
+
+    if not patient:
+        print("Error: Patient not found.")
+        return None
+
+    # age = int(age) 
+    # if age < 0 or age > 120:
+    #     print("Error: Invalid age " + str(age) + ". Age must be between 0 and 120.")
+    #     return None
+    
     try:
         patient.age = age
         patient.blood_type = blood_type
@@ -28,6 +38,27 @@ def create_medical_history(patient_id,age, blood_type, weight, height, allergies
         print(e, "Error creating medical history")
         return None
     
+def get_medical_history(patient_id):
+    patient = Patient.query.get(patient_id)
+
+    if not patient:
+        print("Error: Patient not found.")
+        return None
+
+    try:
+        return {
+            'age': patient.age,
+            'blood_type': patient.blood_type,
+            'weight': patient.weight,
+            'height': patient.height,
+            'allergies': patient.allergies,
+            'medical_conditions': patient.medical_conditions,
+            'medication': patient.medication
+        }
+    except Exception as e:
+        print(e, "Error retrieving medical history")
+        return None
+
 def get_all_patients():
     return Patient.query.all()
 
