@@ -56,6 +56,21 @@ def create_patient_command(firstname, lastname, username, password, email, phone
 
 app.cli.add_command(patient_cli)
 
+#command to list patients
+@patient_cli.command("list", help="Lists all patients")
+def list_patients():
+    patients = get_all_patients()
+    
+    if not patients:
+        print("No patients found.")
+        return
+
+    print("\nPatient List:")
+    print("-" * 40)
+
+    for patient in patients:
+        print(f"ID: {patient.id}, Name: {patient.firstname} {patient.lastname}, Username: {patient.username}, email: {patient.email}")
+
 #command to create a doctor
 @doctor_cli.command("create", help="Creates a doctor")
 @click.argument("firstname", default="John")
@@ -101,9 +116,6 @@ def delete_anesthesiologist_command(username):
 #command to list all medical staff
 @doctor_cli.command("list", help="Lists all medical staff")
 def list_medical_staff():
-    from App.controllers.doctor import get_all_doctors
-    from App.controllers.anesthesiologist import get_all_anesthesiologists
-
     doctors = get_all_doctors()
     anesthesiologists = get_all_anesthesiologists()
     
@@ -130,8 +142,6 @@ def list_medical_staff():
 @click.option("--email", type=str)
 @click.option("--phone_number", type=str)
 def update_doctor_command(username, firstname, lastname, new_username, password, email, phone_number):
-    from App.controllers.doctor import update_doctor
-
     doctor = update_doctor(username, firstname, lastname, new_username, password, email, phone_number)
     if doctor:
         print(f"Doctor '{username}' updated successfully.")
@@ -148,9 +158,8 @@ def update_doctor_command(username, firstname, lastname, new_username, password,
 @click.option("--email", type=str)
 @click.option("--phone_number", type=str)
 def update_anesthesiologist_command(username, firstname, lastname, new_username, password, email, phone_number):
-    from App.controllers.anesthesiologist import update_anesthesiologist
-
     anesthesiologist = update_anesthesiologist(username, firstname, lastname, new_username, password, email, phone_number)
+    
     if anesthesiologist:
         print(f"Anesthesiologist '{username}' updated successfully.")
     else:
@@ -158,6 +167,7 @@ def update_anesthesiologist_command(username, firstname, lastname, new_username,
 
 
 app.cli.add_command(doctor_cli)
+
 
 '''
 Test Commands
