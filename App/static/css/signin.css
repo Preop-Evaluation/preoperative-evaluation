@@ -1,69 +1,79 @@
-/* Ensure the body takes the full screen and applies the background image */
+/* Full-screen background with centered form */
 body {
     font-family: Arial, sans-serif;
     height: 100vh;
     margin: 0;
-    background-image: url("/static/images/index/frontpage.jpg");
-    background-size: calc(90%); /* Cover the entire screen */
-    background-position: center center; /* Center the image */
-    background-attachment: fixed; /* Keep the image fixed while scrolling */
+    background-image: url("/static/images/index/med_background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Center the login form on the page */
+/* Center the sign-in form */
 .container {
     display: block;
     justify-content: center;
     align-items: center;
+    width: 100%;
     height: 100%;
+    padding: 20px;
 }
 
-/* Login form card styling */
+/* Sign-in card styling */
 .card {
-    background: rgba(255, 255, 255, 0.85); /* Semi-transparent background */
-    backdrop-filter: blur(5px); /* Glassmorphism effect */
+    background: rgba(214, 208, 208, 0.95); /* Slightly stronger background for better contrast */
+    backdrop-filter: blur(8px); /* Glass effect */
     padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 800px; /* Limit the width of the card */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 380px; /* Adjusted width */
+    max-width: 90%;
 }
 
-/* Form input and button styling */
+/* Form input styling */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
 .form-control {
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
     border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 /* Button styling */
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-}
 
-button:hover {
+.btn:hover {
     background-color: #0056b3;
 }
 
-/* Link styling */
-a {
-    color: #007bff;
-    text-decoration: none;
+/* Centered text and links */
+.text-center {
+    text-align: center;
+    margin-top: 10px;
 }
 
-a:hover {
+
+.forgot-password:hover, .signup-link:hover, .home-link:hover {
     text-decoration: underline;
 }
 
-/* Centered text styles */
-.text-center {
-    margin-top: 10px;
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .card {
+        width: 90%;
+        padding: 25px;
+    }
 }
