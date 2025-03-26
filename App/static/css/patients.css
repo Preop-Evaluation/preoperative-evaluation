@@ -1,0 +1,12 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+    background-image: url("/static/images/index/med_background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: block;
+    justify-content: left;
+    align-items: left;
+}
