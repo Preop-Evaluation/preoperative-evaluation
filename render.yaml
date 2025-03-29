@@ -6,7 +6,7 @@ services:
     plan: free
     branch: main
     healthCheckPath: /healthcheck
-    buildCommand: "pip install -r requirements.txt && flask db upgrade"  #
+    buildCommand: "flask db upgrade && gunicorn wsgi:app"
     startCommand: "flask init && gunicorn wsgi:app"  
     envVars:
       - fromGroup: flask-postgres-api-settings
@@ -40,4 +40,4 @@ envVarGroups:
 databases:
   - name: flask-postgres-api-db
     plan: free
-    databaseName: mydb  # Ensure this matches the database name in your app
+    databaseName: mydb 
