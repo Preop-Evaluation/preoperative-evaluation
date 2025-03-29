@@ -6,8 +6,8 @@ services:
     plan: free
     branch: main
     healthCheckPath: /healthcheck
-    buildCommand: "pip install -r requirements.txt && flask db upgrade"  # Make sure your Flask app uses Flask-Migrate or similar for DB migrations
-    startCommand: "flask init && gunicorn wsgi:app"  # Ensure you run flask init before starting the app
+    buildCommand: "pip install -r requirements.txt && flask db upgrade"  #
+    startCommand: "flask init && gunicorn wsgi:app"  
     envVars:
       - fromGroup: flask-postgres-api-settings
       - key: POSTGRES_URL
@@ -35,7 +35,7 @@ envVarGroups:
       - key: FLASK_APP
         value: wsgi.py
       - key: FLASK_ENV
-        value: production  # Make sure to set this to production or development
+        value: production  
 
 databases:
   - name: flask-postgres-api-db
