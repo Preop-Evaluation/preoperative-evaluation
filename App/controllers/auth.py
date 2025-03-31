@@ -185,14 +185,14 @@ def reset_password_request():
                 f"Dear {patient.firstname},\n\n"
                 f"To reset your password, click the following link:\n{reset_link}\n\n"
                 f"If you did not request a password reset, please ignore this email.\n\n"
-                f"Regards,\nMedCare Team"
+                f"Regards,\nMedCareTT Team"
             )
             mail.send(msg)
             flash('A password reset link has been sent to your email.', 'info')
             return redirect(url_for('auth.sign_in'))
         else:
             flash('Email address not found. Please try again.', 'danger')
-    return render_template('reset_password.html')
+    return render_template('reset_password.html', title='Patient Reset Password')
 
 # --- Route to reset the password using the token ---
 @auth_blueprint.route('/reset/<token>', methods=['GET', 'POST'])
@@ -219,7 +219,7 @@ def reset_with_token(token):
             flash('User not found.', 'danger')
             return redirect(url_for('auth.reset_password_request'))
     
-    return render_template('new_password.html', token=token)
+    return render_template('new_password.html', token=token, title= 'Patient New Password')
 
 @auth_blueprint.route('/signin', methods=['GET', 'POST'], endpoint='sign_in')
 def sign_in():
