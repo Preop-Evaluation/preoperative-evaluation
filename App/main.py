@@ -4,6 +4,7 @@ from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
+from App.extensions import mail
 
 from App.database import init_db
 from App.config import load_config
@@ -29,6 +30,7 @@ def create_app(overrides={}):
     configure_uploads(app, photos)
     add_views(app)
     init_db(app)
+    mail.init_app(app)
     jwt = setup_jwt(app)
     setup_flask_login(app)
     
