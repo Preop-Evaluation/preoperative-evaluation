@@ -42,7 +42,6 @@ app.cli.add_command(user_cli) # add the group to the cli
 patient_cli = AppGroup('patient', help='Patient object commands')
 
 #command to create a patient
-
 @patient_cli.command("create", help="Creates a patient")
 @click.argument("firstname", default="rob")
 @click.argument("lastname", default="rob")
@@ -54,7 +53,29 @@ def create_patient_command(firstname, lastname, username, password, email, phone
     patient = create_patient(firstname, lastname, username, password, email, phone_number)  
     print(f'{patient.firstname} created!')
 
-app.cli.add_command(patient_cli)
+#command to add medical history for a patient by name
+@patient_cli.command("create_history", help="Creates medical history for a patient")
+@click.argument("firstname")
+@click.argument("lastname")
+@click.argument("age", default=30)
+@click.argument("blood_type", default="O+")
+@click.argument("weight", default=70.0)
+@click.argument("height", default=175)
+@click.argument("allergies", default="None")
+@click.argument("medical_conditions", default="None")
+@click.argument("medication", default="None")
+def create_medical_history_command(firstname, lastname, age, blood_type, weight, height, allergies, medical_conditions, medication):
+    patient = Patient.query.filter_by(firstname=firstname, lastname=lastname).first()
+    
+    if not patient:
+        print(f"Error: Patient with name {firstname} {lastname} not found.")
+        return
+    user = create_medical_history(patient.id, age, blood_type, weight, height, allergies, medical_conditions, medication)
+    
+    if user:
+        print(f"Medical history for patient {patient.firstname} {patient.lastname} created!")
+    else:
+        print("Error creating medical history.")
 
 #command to list patients
 @patient_cli.command("list", help="Lists all patients")
@@ -165,7 +186,7 @@ def update_anesthesiologist_command(username, firstname, lastname, new_username,
     else:
         print(f"Failed to update anesthesiologist '{username}'.")
 
-
+app.cli.add_command(patient_cli)
 app.cli.add_command(doctor_cli)
 
 
