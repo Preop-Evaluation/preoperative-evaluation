@@ -124,4 +124,56 @@ def user_login_api():
 # def identify_user_action():
 #     return jsonify({'message': f"username: {jwt_current_user.username}, id : {jwt_current_user.id}"})
 
+# --- Route to request a password reset ---
+@auth_views.route('/reset_password', methods=['GET', 'POST'])
+def reset_password_request():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        patient = Patient.query.filter_by(email=email).first()
+        if patient:
+            token = generate_reset_token(email)
+            reset_link = url_for('auth_views.reset_with_token', token=token, _external=True)
+            msg = Message(
+                subject="Password Reset Request",
+                sender=current_app.config['MAIL_USERNAME'],
+                recipients=[email]
+            )
+            msg.body = (
+                f"Dear {patient.firstname},\n\n"
+                f"To reset your password, click the following link:\n{reset_link}\n\n"
+                f"If you did not request a password reset, please ignore this email.\n\n"
+                f"Regards,\nMedCareTT Team"
+            )
+            mail.send(msg)
+            flash('A password reset link has been sent to your email.', 'info')
+            return redirect('/signin')
+        else:
+            flash('Email address not found. Please try again.', 'danger')
+    return render_template('reset_password.html', title='Patient Reset Password')
 
+# --- Route to reset the password using the token ---
+@auth_views.route('/reset/<token>', methods=['GET', 'POST'])
+def reset_with_token(token):
+    email = verify_reset_token(token)
+    if not email:
+        flash('The reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('auth_views.reset_password_request'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        if password != confirm_password:
+            flash('Passwords do not match. Please try again.', 'danger')
+            return render_template('new_password.html', token=token)
+        
+        patient = Patient.query.filter_by(email=email).first()
+        if patient:
+            patient.set_password(password)
+            db.session.commit()
+            flash('Your password has been updated successfully.', 'success')
+            return redirect('/signin')
+        else:
+            flash('User not found.', 'danger')
+            return redirect(url_for('auth_views.reset_password_request'))
+    
+    return render_template('new_password.html', token=token, title= 'Patient New Password')
