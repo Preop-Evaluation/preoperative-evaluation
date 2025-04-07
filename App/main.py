@@ -28,6 +28,8 @@ def create_app(overrides={}):
     add_auth_context(app)
     photos = UploadSet('photos', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, photos)
+    from App.controllers.admin import admin_blueprint
+    app.register_blueprint(admin_blueprint)
     add_views(app)
     init_db(app)
     mail.init_app(app)
