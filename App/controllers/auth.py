@@ -6,6 +6,7 @@ from App.database import db
 from App.token import generate_reset_token, verify_reset_token
 from App.extensions import mail
 from flask_mail import Message
+from App.models.admin import Admin
 
 from App.models import User, Doctor, Anesthesiologist, Patient
 
