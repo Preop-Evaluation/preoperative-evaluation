@@ -102,6 +102,7 @@ def get_all_doctors():
             "id": doctor.id,
             "name": f"{doctor.firstname} {doctor.lastname}",
             "username": doctor.username,
+            "email": doctor.email,
             "role": "Doctor"
         }
         for doctor in doctors
