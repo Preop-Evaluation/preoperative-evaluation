@@ -7,3 +7,4 @@ from .doctor import *
 from .patient import *
 from .questions import *
 from .notification import *
+from .admin import *
