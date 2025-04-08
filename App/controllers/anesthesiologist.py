@@ -78,6 +78,7 @@ def get_all_anesthesiologists():
             "id": anesthesiologist.id,
             "name": f"{anesthesiologist.firstname} {anesthesiologist.lastname}",
             "username": anesthesiologist.username,
+            "email": anesthesiologist.email,
             "role": "Anesthesiologist"
         }
         for anesthesiologist in anesthesiologists
