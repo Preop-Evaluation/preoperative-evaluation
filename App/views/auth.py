@@ -50,7 +50,12 @@ def signin_action():
     logout_user()
     login_user(doctor)
     return redirect('/dashboard/doctor')
-    # return redirect('/dashboard/doctor')
+
+  admin = Admin.query.filter_by(email=data['email']).first()
+  if admin and admin.check_password(data['password']):
+      logout_user() 
+      login_user(admin)  
+      return redirect('/admin')  
   
   flash('Error in email/password.')
   return redirect('/signin')
@@ -70,7 +75,7 @@ def signup_action():
 
   except Exception as e:      
     print("Error in signup: ", e)
-    flash("Username, Email, or UWI ID already exist")  # error message
+    flash("Username, Email, or ID already exist")  # error message
     return redirect(url_for('auth_views.signup_page'))
 
 
