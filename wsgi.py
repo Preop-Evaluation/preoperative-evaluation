@@ -1,8 +1,6 @@
 import click, pytest, sys
 from flask import Flask, render_template
 from flask.cli import with_appcontext, AppGroup
-
-
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import *
@@ -28,6 +26,8 @@ User Commands
 
 user_cli = AppGroup('user', help='User object commands') 
 doctor_cli = AppGroup('doctor', help='Doctor-related commands')
+admin_cli = AppGroup('admin', help='Admin-related commands')
+patient_cli = AppGroup('patient', help='Patient object commands')
 
 @user_cli.command("list", help="Lists users in the database")
 @click.argument("format", default="string")
@@ -39,7 +39,43 @@ def list_user_command(format):
 
 app.cli.add_command(user_cli) # add the group to the cli
 
-patient_cli = AppGroup('patient', help='Patient object commands')
+#command to list an admin
+@admin_cli.command("list", help="Lists all admins")
+def list_admins():
+    admins = get_all_admins()
+    
+    if not admins:
+        print("No admins found.")
+        return
+
+    print("\nAdmin List:")
+    print("-" * 40)
+
+    for admin in admins: 
+        print(f"ID: {admin['id']}, Name: {admin['name']}, Username: {admin['username']}, Role: {admin['role']}, Email: {admin['email']}")
+
+#command to create an admin
+@admin_cli.command("create", help="Creates an admin")
+@click.argument("firstname", default="rob")
+@click.argument("lastname", default="rob")
+@click.argument("username", default="rob")
+@click.argument("password", default="rob")
+@click.argument("email", default="rob")
+@click.argument("phone_number", default="rob")
+def create_admin_command(firstname, lastname, username, password, email, phone_number):  
+    admin = create_admin(firstname, lastname, username, password, email, phone_number)  
+    print(f'{admin.firstname} created!')
+app.cli.add_command(admin_cli)
+
+#command to delete an admin
+@admin_cli.command("delete", help="Deletes an admin by username")
+@click.argument("username", type=str)
+def delete_admin_command(username):
+    if delete_admin(username):
+        print(f"Admin with username {username} deleted successfully.")
+    else:
+        print(f"Failed to delete admin with username {username}.")
+
 
 #command to create a patient
 @patient_cli.command("create", help="Creates a patient")
@@ -148,10 +184,10 @@ def list_medical_staff():
     print("-" * 40)
     
     for doctor in doctors:
-        print(f"ID: {doctor['id']}, Name: {doctor['name']}, Username: {doctor['username']}, Role: {doctor['role']}")
+        print(f"ID: {doctor['id']}, Name: {doctor['name']}, Username: {doctor['username']}, Role: {doctor['role']}, Email: {doctor['email']}")
     
     for anesthesiologist in anesthesiologists:
-        print(f"ID: {anesthesiologist['id']}, Name: {anesthesiologist['name']}, Username: {anesthesiologist['username']}, Role: {anesthesiologist['role']}")
+        print(f"ID: {anesthesiologist['id']}, Name: {anesthesiologist['name']}, Username: {anesthesiologist['username']}, Role: {anesthesiologist['role']}, Email: {anesthesiologist['email']}")
 
 #command to update a doctor's info
 @doctor_cli.command("update", help="Updates a doctor's information")
