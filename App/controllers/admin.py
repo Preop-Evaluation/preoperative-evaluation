@@ -1,11 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from App.models.admin import Admin
+from App.models.user import User
 from App.models import User
 from App.database import db
-from App.controllers.doctor import create_doctor
-from App.controllers.anesthesiologist import create_anesthesiologist
-from App.controllers.doctor import delete_doctor
-from App.controllers.anesthesiologist import delete_anesthesiologist
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -15,57 +12,30 @@ def create_admin(firstname, lastname, username, password, phone_number, email):
     db.session.commit()
     return new_admin
 
-@admin_blueprint.route('/')
-def dashboard():
-    users = User.query.all()
-    return render_template('admin_dashboard.html', users=users)
+def get_all_admins():
+    admins = Admin.query.all() 
+    return [
+        {
+            "id": admin.id,
+            "name": f"{admin.firstname} {admin.lastname}",
+            "username": admin.username,
+            "email": admin.email,
+            "role": "Admin"
+        }
+        for admin in admins  
+    ]
 
-@admin_blueprint.route('/add_staff', methods=['GET', 'POST'])
-def add_staff():
-    if request.method == 'POST':
-        role = request.form.get('role')
-        firstname = request.form.get('firstname')
-        lastname = request.form.get('lastname')
-        username = request.form.get('username')
-        password = request.form.get('password')
-        phone_number = request.form.get('phone_number')
-        email = request.form.get('email')
+def delete_admin(username):
+    try:
+        admin_user = Admin.query.filter_by(username=username).first()
+        if not admin_user:
+            print(f"Admin with username '{username}' not found.")
+            return False
 
-        if role == 'doctor':
-            staff = create_doctor(firstname, lastname, username, password, email, phone_number)
-        elif role == 'anesthesiologist':
-            staff = create_anesthesiologist(firstname, lastname, username, password, email, phone_number)
-        else:
-            flash('Invalid staff role selected')
-            return redirect(url_for('admin.add_staff'))
-
-        if staff:
-            flash('Staff added successfully.')
-        else:
-            flash('Error adding staff.')
-        return redirect(url_for('admin.dashboard'))
-
-    return render_template('admin_add_staff.html')
-
-@admin_blueprint.route('/remove_staff/<username>', methods=['POST'])
-def remove_staff(username):
-    if delete_doctor(username) or delete_anesthesiologist(username):
-        flash('Staff removed successfully.')
-    else:
-        flash('Staff removal failed.')
-    return redirect(url_for('admin.dashboard'))
-
-@admin_blueprint.route('/reset_staff_password', methods=['GET', 'POST'])
-def reset_staff_password():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        new_password = request.form.get('new_password')
-        user = User.query.filter_by(username=username).first()
-        if user:
-            user.set_password(new_password)
-            db.session.commit()
-            flash('Password reset successfully.')
-        else:
-            flash('User not found.')
-        return redirect(url_for('admin.dashboard'))
-    return render_template('admin_reset_password.html')
+        db.session.delete(admin_user)
+        db.session.commit()
+        print(f"Admin {admin_user.firstname} {admin_user.lastname} deleted successfully.")
+        return True
+    except Exception as e:
+        print(f"{e} - Error deleting admin")
+        return False
