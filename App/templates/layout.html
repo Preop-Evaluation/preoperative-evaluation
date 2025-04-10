@@ -41,11 +41,14 @@
               <div class="d-flex">
                 <ul class="navbar-nav mr-auto d-flex">
                   {% if current_user.is_authenticated %}
-                  {%if current_user.type =='doctor' %}
-      
+                  {% if current_user.type == 'admin' %}
+                  <li class="nav-item">
+                    <a href="/admin" class="nav-link"><i class="fa fa-user-circle-o"></i>{{ current_user.username }}</a>
+                  </li>
+                  {% elif current_user.type =='doctor' %}
                   <li class="nav-item">
                     <a href="/dashboard/doctor" class="nav-link"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                      DashBoard
+                    {{ current_user.username }}
                     </a>
                   </li>
       
@@ -53,10 +56,9 @@
       
                   <li class="nav-item">
                     <a href="/dashboard/anesthesiologist" class="nav-link"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                      DashBoard
+                    {{ current_user.username }}
                     </a>
                   </li>
-      
                   {%else%}
                   <li class="nav-item">
                     <a class="nav-link position-relative" href="/patient/profile"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
