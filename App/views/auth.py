@@ -31,20 +31,19 @@ Action Routes
 def signin_action():
 
   data = request.form
-  
-  patient = Patient.query.filter_by(email = data['email']).first()    
+
+  patient = Patient.query.filter_by(email = data['email']).first()
   if patient and patient.check_password(data['password']):
     logout_user()
     login_user(patient)
     return redirect('/patient/profile')
-    # return redirect(request.referrer)
-  
+
   anesthesiologist = Anesthesiologist.query.filter_by(email = data['email']).first()
-  if anesthesiologist and anesthesiologist.check_password(data['password']):  
+  if anesthesiologist and anesthesiologist.check_password(data['password']):
     logout_user()
-    login_user(anesthesiologist)         
+    login_user(anesthesiologist)
     return redirect('/dashboard/anesthesiologist')
-  
+
   doctor = Doctor.query.filter_by(email = data['email']).first()
   if doctor and doctor.check_password(data['password']):
     logout_user()
@@ -88,9 +87,9 @@ def identify_page():
   
 @auth_views.route('/logout', methods=['GET'])
 def logout_action():
-    logout()
-    flash('Logged Out!')
-    return redirect('/')
+  logout()
+  flash('Logged Out!')
+  return redirect('/')
 
 '''
 API Routes
