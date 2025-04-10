@@ -16,7 +16,7 @@ def dashboard():
 
     users = doctors + anesthesiologists + patients + admins
 
-    return render_template('admin_dashboard.html', users=users)
+    return render_template('admin_dashboard.html', users=users, title= 'Admin Dashboard')
 
 
 @admin_views.route('/add_staff', methods=['GET', 'POST'])
@@ -44,7 +44,7 @@ def add_staff():
             flash('Error adding staff.')
         return redirect(url_for('admin_views.dashboard'))
 
-    return render_template('admin_add_staff.html')
+    return render_template('admin_add_staff.html', title='Add Staff')
 
 @admin_views.route('/remove_staff/<username>', methods=['POST'])
 def remove_staff(username):
@@ -72,4 +72,4 @@ def reset_staff_password():
         else:
             flash('User not found.')
         return redirect(url_for('admin_views.dashboard'))
-    return render_template('admin_reset_password.html')
+    return render_template('admin_reset_password.html', title='Reset Staff Password')
