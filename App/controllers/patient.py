@@ -104,3 +104,17 @@ def update_patient(username, firstname=None, lastname=None, new_username=None, p
     
     except Exception as e:
         print(f"Error updating patient: {e}")
+
+def delete_patient(username):
+    try:
+        patient = Patient.query.filter_by(username=username).first()
+        if not patient:
+            print(f"Patient with username '{username}' not found.")
+            return False
+        db.session.delete(patient)
+        db.session.commit()
+        print(f"Patient {patient.firstname} {patient.lastname} deleted successfully.")
+        return True
+    except Exception as e:
+        print(e, "Error deleting patient")
+        return False
