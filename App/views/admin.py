@@ -48,7 +48,7 @@ def add_staff():
 
 @admin_views.route('/remove_staff/<username>', methods=['POST'])
 def remove_staff(username):
-    if delete_doctor(username) or delete_anesthesiologist(username):
+    if delete_doctor(username) or delete_anesthesiologist(username) or delete_patient(username):
         flash('Staff removed successfully.')
     else:
         flash('Staff removal failed.')
