@@ -43,12 +43,12 @@
                   {% if current_user.is_authenticated %}
                   {% if current_user.type == 'admin' %}
                   <li class="nav-item">
-                    <a href="/admin" class="nav-link"><i class="fa fa-user-circle-o"></i>{{ current_user.username }}</a>
+                    <a href="/admin" class="nav-link"><i class="fa fa-user-circle-o"></i>{{ current_user.firstname }} {{ current_user.lastname }}</a>
                   </li>
                   {% elif current_user.type =='doctor' %}
                   <li class="nav-item">
                     <a href="/dashboard/doctor" class="nav-link"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                    {{ current_user.username }}
+                    {{ current_user.firstname }} {{ current_user.lastname }}
                     </a>
                   </li>
       
@@ -56,13 +56,13 @@
       
                   <li class="nav-item">
                     <a href="/dashboard/anesthesiologist" class="nav-link"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                    {{ current_user.username }}
+                    {{ current_user.firstname }} {{ current_user.lastname }}
                     </a>
                   </li>
                   {%else%}
                   <li class="nav-item">
                     <a class="nav-link position-relative" href="/patient/profile"><i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                      {{ current_user.username }}
+                      {{ current_user.firstname }} {{ current_user.lastname }}
                       {% if current_user.notifications|length > 0 %}
                       {% set unseen_notifications = current_user.notifications|selectattr('seen', 'equalto', false)|list %}
                       {% if unseen_notifications|length > 0 %}
