@@ -16,21 +16,21 @@ Page Routes
 def anesthesiologist_dashboard_page():
     patients = get_all_patients()
     patient_questionnaires = get_all_questionnaires()
-    return render_template('anesthesiologist_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients)
+    return render_template('anesthesiologist_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients, title= 'Anesthesiologist Dashboard')
 
 
 @anesthesiologist_views.route('/dashboard/anesthesiologist/patient/<patient_id>', methods=['GET'])
 @anesthesiologist_required
 def anesthesiologist_patient_info_page(patient_id):
     patient = get_patient_by_id(patient_id)
-    return render_template('patient_info.html', patient=patient)
+    return render_template('patient_info.html', patient=patient, title= 'Patient Information')
 
 @anesthesiologist_views.route('/dashboard/anesthesiologist/questionnaire/<questionnaire_id>', methods=['GET'])
 @anesthesiologist_required
 def anesthesiologist_questionnaire_page(questionnaire_id):
     questionnaire = get_questionnaire(questionnaire_id)
     questions = get_default_questionnaire()
-    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions)
+    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions, title= 'Questionnaire View')
 
 
 '''
