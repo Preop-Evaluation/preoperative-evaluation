@@ -18,13 +18,13 @@ Page Routes
 def doctor_dashboard_page():
     patients = get_all_patients()
     patient_questionnaires = get_all_questionnaires()
-    return render_template('doctor_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients)
+    return render_template('doctor_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients, title= 'Doctor Dashboard')
 
 @doctor_views.route('/dashboard/doctor/patient/<patient_id>', methods=['GET'])
 @doctor_required
 def doctor_patient_info_page(patient_id):
     patient = get_patient_by_id(patient_id)
-    return render_template('patient_info.html', patient=patient)
+    return render_template('patient_info.html', patient=patient, title= 'Patient Infomation')
 
 @doctor_views.route('/dashboard/doctor/questionnaire', methods=['GET'])
 @doctor_required
@@ -32,7 +32,7 @@ def doctor_questionnaire_page():
     questionnaire_id = request.args.get('questionnaire_id')
     questionnaire = get_questionnaire(questionnaire_id)
     questions = get_default_questionnaire()
-    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions)
+    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions, title= 'Questionnaire')
 
 
 '''
