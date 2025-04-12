@@ -18,7 +18,7 @@ def patient_profile_page():
     notifications = get_patient_notifications(current_user.id)
     if not current_user.med_history_updated:
         flash('Please update your Medical History to be able to fill out a questionnaire')
-    return render_template('patient_account.html', notifications=notifications)
+    return render_template('patient_account.html', notifications=notifications, title= 'Patient Profile')
 
 
 '''
@@ -44,7 +44,7 @@ def manage_medical_history():
         return redirect(request.referrer)
     
     medical_history = get_medical_history(current_user.id)
-    return render_template('patient_account.html', medical_history=medical_history)
+    return render_template('patient_account.html', medical_history=medical_history, title= 'Patient Account')
 
 
 @patient_views.route('/seen/<notification_id>', methods=['POST'])
