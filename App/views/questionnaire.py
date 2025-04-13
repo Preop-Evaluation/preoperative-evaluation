@@ -19,7 +19,7 @@ def questionnaire_page():
             latest = get_latest_questionnaire(current_user.id)
             if latest:
                 latest_responses = latest.responses
-        return render_template('questionnaire_form.html', questions=questions, latest_responses=latest_responses)
+        return render_template('questionnaire_form.html', questions=questions, latest_responses=latest_responses, title="Questionnaire")
     else:
         return redirect(url_for('patient_views.patient_profile_page'))
 
@@ -36,7 +36,7 @@ def questionnaire_details_page():
     if questionnaire.submitted_date:
         ast_tz = pytz.timezone("America/Port_of_Spain")
         formatted_date = questionnaire.submitted_date.astimezone(ast_tz).strftime("%d/%m/%Y - %I:%M %p")
-    return render_template('questionnaire_view.html', questions=questions, questionnaire=questionnaire, formatted_date=formatted_date)
+    return render_template('questionnaire_view.html', questions=questions, questionnaire=questionnaire, formatted_date=formatted_date, title="Questionnaire Details")
 
 @questionnaire_views.route('/submit_questionnaire', methods=['POST'])
 @patient_required
@@ -58,7 +58,7 @@ def submit_questionnaire():
         flash('Questionnaire submitted successfully!')
     else:
         flash('Error submitting questionnaire!')
-    return render_template('questionnaire_view.html', questions=questions, questionnaire=questionnaire)
+    return render_template('questionnaire_view.html', questions=questions, questionnaire=questionnaire, title="Questionnaire Details")
 
 @questionnaire_views.route('/update_flagged_questionnaire/<questionnaire_id>', methods=['GET', 'POST'])
 @patient_required
@@ -87,8 +87,11 @@ def update_flagged_questionnaire(questionnaire_id):
          questionnaire.flagged_questions = []
          questionnaire.status = "pending"
          db.session.commit()
-         # Notify all anesthesiologists about the update
-         from App.models.anesthesiologist import Anesthesiologist
+         print("PREVIOUS RESPONSES SAVED:")
+         print(questionnaire.previous_responses)
+         print("CURRENT RESPONSES:")
+         print(questionnaire.responses)
+
          anesthesiologists = Anesthesiologist.query.all()
          for anesth in anesthesiologists:
              msg = Message(
