@@ -1,0 +1,159 @@
+
+{% extends 'layout.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Questionnaire</h1>
+    <form action="/submit_questionnaire" method="POST">
+        {% if latest_responses %}
+            {% for question in questions %}
+            <div class="mb-3">
+                <label for="question_{{ question.id }}" class="form-label">{{ question.text }}</label>
+                {% if question.type == "long_answer" %}
+                <textarea class="form-control" id="question_{{ question.id }}" name="question_{{ question.id }}" rows="3">{{ latest_responses.get(question.id, '') }}</textarea>
+                {% elif question.type == "multiple_choice" %}
+                <div>
+                    {% for choice in question.choices %}
+                    <div class="form-check">
+                        <input class="form-check-input radio-prefill" type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="{{ choice }}" {{ 'checked' if latest_responses.get(question.id) == choice else '' }}>
+                        <label class="form-check-label" for="question_{{ question.id }}">
+                            {{ choice }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% elif question.type == "boolean" %}
+                <div class="form-check">
+                    <input class="form-check-input radio-prefill" type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="yes" {% if latest_responses.get(question.id) == 'yes' %} checked {%
+                        endif %}>                    
+                    <label class="form-check-label" for="question_{{ question.id }}">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input " type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="no" {% if latest_responses.get(question.id) == 'no' %} checked {%
+                        endif %}>
+                    <label class="form-check-label" for="question_{{ question.id }}">No</label>
+                </div>
+                {% endif %}
+                {% if question.follow_ups %}
+                <div class="mt-2">
+                    {% for follow_up in question.follow_ups %}
+                    <div class="follow-up-question mb-3" id="follow_up_{{ follow_up.id }}" style="display: none;">
+                        <label for="question_{{ follow_up.id }}" class="form-label">{{ follow_up.text }}</label>
+                        <textarea class="form-control" id="question_{{ follow_up.id }}" name="question_{{ follow_up.id }}" rows="2">{{ latest_responses.get(follow_up.id, '') }}</textarea>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            {% for question in questions %}
+            <div class="mb-3">
+                <label for="question_{{ question.id }}" class="form-label">{{ question.text }}</label>
+                {% if question.type == "long_answer" %}
+                <textarea class="form-control" id="question_{{ question.id }}" name="question_{{ question.id }}" rows="3"></textarea>
+                {% elif question.type == "multiple_choice" %}
+                <div>
+                    {% for choice in question.choices %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="{{ choice }}">
+                        <label class="form-check-label" for="question_{{ question.id }}">
+                            {{ choice }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% elif question.type == "boolean" %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="yes">
+                    <label class="form-check-label" for="question_{{ question.id }}">Yes</label>
+                </div>  
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="question_{{ question.id }}" name="question_{{ question.id }}" value="no">
+                    <label class="form-check-label" for="question_{{ question.id }}">No</label>
+                </div>             
+                {% endif %}
+                {% if question.follow_ups %}
+                <div class="mt-2">
+                    {% for follow_up in question.follow_ups %}
+                    <div class="follow-up-question mb-3" id="follow_up_{{ follow_up.id }}" style="display: none;">
+                        <label for="question_{{ follow_up.id }}" class="form-label">{{ follow_up.text }}</label>
+                        <textarea class="form-control" id="question_{{ follow_up.id }}" name="question_{{ follow_up.id }}" rows="2"></textarea>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.radio-prefill').forEach(function(radio) {
+                
+                    let followUpId = radio.id.replace('question_', '') + 'a';
+                    console.log(followUpId);
+
+                    if (document.getElementById('follow_up_' + followUpId)) {
+                        let followUp = document.getElementById('follow_up_' + followUpId);
+                        console.log(followUp);
+                        if (radio.value === 'yes') {
+                            followUp.style.display = 'block';
+                        } 
+                        if (radio.value === 'Other') {
+                            followUp.style.display = 'block';
+                        } 
+                    }
+                  
+                
+            });
+        });
+
+
+        $(document).ready(function() {
+
+        //     $('body').on('change', 'input[type="radio"][value="yes"], input[type="radio"][value="no"]', function() {
+            
+        //     let followUpId = $(this).attr('id') + 'a';
+
+        //     if ($(this).val() === 'yes' && $(this).is(':checked')) {
+        //         $('#' + followUpId).parent().show();
+        //     } else if ($(this).val() === 'no' && $(this).is(':checked')) {
+        //         $('#' + followUpId).parent().hide();                 
+        //     }
+        // });
+
+            $('input[type=radio]').change(function() {
+                // Assuming follow-up questions have an ID that is a child of the main question, like 'q2' and 'q2a'.
+                let followUpId = $(this).attr('id') + 'a';
+                
+                if ($(this).val() === 'Other') {
+                    $('#' + followUpId).parent().show();
+                } else {
+                    $('#' + followUpId).parent().hide();
+                }
+
+                if ($(this).val() === 'yes') {
+                
+                    $('#' + followUpId).parent().show();
+                } else if ($(this).val() === 'no') {
+                   
+                    $('#' + followUpId).parent().hide();
+                    
+                }
+            });
+            $('input[type=checkbox]').change(function() {
+                let followUpId = $(this).attr('id') + 'a';
+                console.log(followUpId);
+                $('#' + followUpId).parent().toggle(this.checked);
+            });
+        });
+    </script>
+{% endblock %}

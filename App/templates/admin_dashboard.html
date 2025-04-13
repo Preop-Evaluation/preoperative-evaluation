@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h1>Admin Dashboard</h1>
+  <h2>Users</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.type }}</td>
+        <td>
+          {% if user.type != 'admin' %}
+          <form method="post" action="{{ url_for('admin_views.remove_staff', username=user.username) }}" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('admin_views.add_staff') }}" class="btn btn-primary">Add Staff</a>
+  <a href="{{ url_for('admin_views.reset_staff_password') }}" class="btn btn-warning">Reset Staff Password</a>
+</div>
+{% endblock %}

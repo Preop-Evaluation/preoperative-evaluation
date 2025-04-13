@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="{{url_for('static', filename='css/signup.css')}}">
+{% extends 'layout.html' %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="card">
+        <h2 class="text-center">Patient Sign Up</h2>
+
+        <form method="post" action="{{ url_for('auth_views.signup_action') }}">
+            <!-- Full Name (Two columns in one row) -->
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="firstname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" required>
+                </div>
+                <div class="col">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required pattern=".{8,}" title="Must contain at least 8 or more characters">
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone_number" name="phone_number" required pattern="[0-9]{7}" title="Must contain 7 digits">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Submit</button>
+
+            <!-- Sign In and Back Home Links -->
+            <p class="text-center mt-3">
+                Already Registered? 
+                <a href="{{ url_for('auth_views.signin_page') }}" class="text-primary">Sign In</a>
+            </p>
+
+            <p class="text-center">
+                <a href="{{ url_for('index_views.index_page') }}" class="text-secondary">Back Home</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}
