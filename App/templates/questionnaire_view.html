@@ -69,20 +69,18 @@
             <div class="card-body" style="max-height: 500px; overflow-y: auto;">
                 {% if current_user.type != "patient" and questionnaire.previous_responses %}
                 <div class="alert alert-info">
-                    <h4>Comparison of Flagged Responses</h4>
-                    <p>The following responses were flagged earlier and have been updated:</p>
+                    <h5>Comparison of Flagged Responses</h5>
                     <ul>
                         {% for qid, original in questionnaire.previous_responses.items() %}
-                            {% set updated = questionnaire.responses.get(qid) %}
-                            {% for question in questions %}
-                                {% if question.id == qid and original and updated and original != updated %}
-                                    <li>
-                                        <strong>{{ question.text }}</strong><br>
-                                        <em>Original Answer:</em> {{ original }}<br>
-                                        <em>Updated Answer:</em> {{ updated }}
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
+                        {% set updated = questionnaire.responses.get(qid) %}
+                        {% set question_obj = (questions | selectattr("id", "equalto", qid) | list).0 %}
+                            {% if question_obj and original != updated %}
+                                <li>
+                                    <strong>{{ question_obj.text }}</strong><br>
+                                    <em>Original Answer:</em> {{ original }}<br>
+                                    <em>Updated Answer:</em> {{ updated }}
+                                </li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
                 </div>
