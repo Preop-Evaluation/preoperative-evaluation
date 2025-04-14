@@ -28,6 +28,7 @@ user_cli = AppGroup('user', help='User object commands')
 doctor_cli = AppGroup('doctor', help='Doctor-related commands')
 admin_cli = AppGroup('admin', help='Admin-related commands')
 patient_cli = AppGroup('patient', help='Patient object commands')
+questionnaire_cli = AppGroup('questionnaire', help='Questionnaire object commands')
 
 @user_cli.command("list", help="Lists users in the database")
 @click.argument("format", default="string")
@@ -222,9 +223,83 @@ def update_anesthesiologist_command(username, firstname, lastname, new_username,
     else:
         print(f"Failed to update anesthesiologist '{username}'.")
 
+#command to get all questionnaires
+@questionnaire_cli.command("list", help="Lists all questionnaires")
+def list_questionnaires():
+    questionnaires=get_all_questionnaires()
+
+    if not questionnaires:
+        print("No questionnaires found.")
+        return
+
+    print("\nQuestionnaires List:")
+    print("-" * 40)
+    
+    for questionnaire in questionnaires:
+        print(f"ID: {questionnaire.id}, Response: {questionnaire.responses}, Flagged: {questionnaire.flagged_questions}")
+    
+#command to edit a flagged question in a questionnaire
+@questionnaire_cli.command("edit_flagged", help="Edits a flagged question")
+@click.argument("questionnaire_id")
+@click.argument("question_id")
+@click.argument("new_answer")
+def edit_flagged_question_command(questionnaire_id, question_id, new_answer):
+    questionnaire = get_questionnaire(questionnaire_id)
+    
+    if not questionnaire:
+        print(f"Error: Questionnaire with ID {questionnaire_id} not found.")
+        return
+    
+    if question_id not in questionnaire.flagged_questions:
+        print(f"Error: Question {question_id} is not flagged.")
+        return
+    
+    print("Before Update:", questionnaire.responses)
+    
+    #the database was being quirky, so i ended up copying the responses to a new dict and then updating the questionnaire
+    updated_responses = questionnaire.responses.copy()  
+    updated_responses[question_id] = new_answer          
+    questionnaire.responses = updated_responses          
+    
+    print("After Update: ", questionnaire.responses)
+    
+    try:
+        db.session.commit()
+        print(f"Flagged question {question_id} in questionnaire {questionnaire_id} updated to '{new_answer}'.")
+    except Exception as e:
+        print(f"Error during commit: {e}")
+        db.session.rollback()
+
+@questionnaire_cli.command("edit_followup", help="Edits a flagged follow-up question in a questionnaire")
+@click.argument("questionnaire_id")
+@click.argument("followup_id")
+@click.argument("new_answer")
+def edit_flagged_followup_command(questionnaire_id, followup_id, new_answer):
+    questionnaire = get_questionnaire(questionnaire_id)
+    
+    if not questionnaire:
+        print(f"Error: Questionnaire with ID {questionnaire_id} not found.")
+        return
+    
+    print("Before Update:", questionnaire.responses)
+    
+    updated_responses = questionnaire.responses.copy() if questionnaire.responses else {}
+    updated_responses[followup_id] = new_answer          
+    questionnaire.responses = updated_responses          
+    
+    print("After Update:", questionnaire.responses)
+    
+    try:
+        db.session.commit()
+        print(f"Follow-up question {followup_id} in questionnaire {questionnaire_id} updated to '{new_answer}'.")
+    except Exception as e:
+        print(f"Error during commit: {e}")
+        db.session.rollback()
+
+
 app.cli.add_command(patient_cli)
 app.cli.add_command(doctor_cli)
-
+app.cli.add_command(questionnaire_cli)
 
 '''
 Test Commands
