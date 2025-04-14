@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+    <div class="container">
+        <h1>Patients</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <!-- <th>Phone</th> -->
+                    <th>Questionnaires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.firstname }}</td>
+                        <td>{{ patient.lastname }}</td>
+                        <td>{{ patient.email }}</td>
+                        <!-- <td>{{ patient.phone_number }}</td>  -->
+                        <td>{{ patient.questionnaires|length}} </td>
+                        <td>
+                            {% if current_user.type == 'doctor' %}
+                                <a href="/dashboard/doctor/patient/{{ patient.id }}" class="btn btn-primary">View</a>
+                            {% elif current_user.type == 'anesthesiologist' %}
+                                <a href="/dashboard/anesthesiologist/patient/{{ patient.id }}" class="btn btn-primary">View</a>
+                            {% endif %}                          
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>

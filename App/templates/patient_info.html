@@ -1,0 +1,76 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+{% extends 'layout.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+
+<div class="row mt-5">
+    <!-- Patient Information Card (Left) -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">               
+                <h2 class="text-center">Patient Profile</h2>
+            </div>
+            <div class="card-body">                               
+                <p class="card-text"><strong>Name:</strong> {{ patient.firstname }} {{ patient.lastname}}</p>
+                <p class="card-text"><strong>Email:</strong> {{ patient.email }}</p>
+                <p class="card-text"><strong>Phone Number:</strong> {{ patient.phone_number }}</p>
+                <p class="card-text"><strong>Age:</strong> {{ patient.age }}</p>
+                <p class="card-text"><strong>Blood Type:</strong> {{ patient.blood_type }}</p>
+                <p class="card-text"><strong>Weight:</strong> {{ patient.weight }}</p>
+                <p class="card-text"><strong>Height:</strong> {{ patient.height }}</p>
+                <p class="card-text"><strong>Allergies:</strong> {{ patient.allergies }}</p>
+                <p class="card-text"><strong>Medical Conditions:</strong> {{ patient.medical_conditions }}</p>
+                <p class="card-text"><strong>Medication:</strong> {{ patient.medication }}</p>
+                <!-- Other patient details -->                  
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            {% if current_user.type == 'doctor' %}
+            <div class="card-header">
+                <h2 class="">Approved Questionnaires</h2>
+            </div>
+            <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+                <ul class="list-group">
+                    <!-- Replace with dynamic content -->
+                    {% for questionnaire in patient.questionnaires if questionnaire.status == 'approved' %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Questionnaire ID: {{ questionnaire.id }}
+                        | Date: {{ questionnaire.submitted_date.strftime('%Y-%m-%d') }}
+                        | Status: {{ questionnaire.status }}
+                        <a href="{{ url_for('doctor_views.doctor_questionnaire_page', questionnaire_id=questionnaire.id) }}"
+                            class="btn btn-primary">View</a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item">No approved questionnaires.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <div class="card-header">
+                <h2 class="">Questionnaires</h2>
+            </div>
+            <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+                    
+                <ul class="list-group">
+                    <!-- Replace with dynamic content -->
+                    {% for questionnaire in patient.questionnaires %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Questionnaire ID: {{ questionnaire.id }}
+                        | Date: {{ questionnaire.submitted_date.strftime('%Y-%m-%d') }}
+                        | Status: {{ questionnaire.status }}
+                        <a href="{{ url_for('anesthesiologist_views.anesthesiologist_questionnaire_page', questionnaire_id=questionnaire.id) }}"
+                            class="btn btn-primary">View</a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item">No questionnaires found.</li>
+                    {% endfor %}
+                </ul>                    
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
