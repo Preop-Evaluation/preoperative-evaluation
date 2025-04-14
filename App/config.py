@@ -6,6 +6,11 @@ def load_config(app, overrides):
     elif os.environ.get('ENV') == 'PRODUCTION':
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+        app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+        app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+        app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+        app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587)) 
+        app.config['MAIL_USE_TLS'] = True
     else:
         app.config.from_object('App.default_config')
     app.config.from_prefixed_env()
