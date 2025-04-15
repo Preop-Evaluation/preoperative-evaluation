@@ -20,15 +20,13 @@
             <textarea class="form-control" id="question_{{ question.id }}" name="question_{{ question.id }}" rows="3">{{ questionnaire.responses[question.id] }}</textarea>
         {% endif %}
         {% if question.follow_ups %}
-              <div class="mt-2">
+            <div class="mt-2">
                 {% for follow_up in question.follow_ups %}
-                  <p><strong>{{ follow_up.text }}</strong></p>
-                  <textarea class="form-control" id="question_{{ follow_up.id }}" name="question_{{ follow_up.id }}" rows="2">
-                      {{ questionnaire.responses.get(follow_up.id, '') }}
-                  </textarea>
+                    <p><strong>{{ follow_up.text }}</strong></p>
+                    <textarea class="form-control" id="question_{{ follow_up.id }}" name="question_{{ follow_up.id }}" rows="2">{{ questionnaire.responses[follow_up.id] }}</textarea>
                 {% endfor %}
-              </div>
-          {% endif %}
+            </div>
+        {% endif %}
       </div>
     {% endfor %}
     <button type="submit" class="btn btn-primary">Submit Updates</button>
