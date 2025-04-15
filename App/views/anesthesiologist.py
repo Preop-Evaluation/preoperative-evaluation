@@ -13,7 +13,7 @@ from App.controllers.questions import get_default_questionnaire
 from App.controllers.questionnaire import get_questionnaire
 import json
 import pytz
-
+from App.controllers.questions import get_all_flattened_questions
 
 anesthesiologist_views = Blueprint('anesthesiologist_views', __name__, template_folder='../templates')
 
@@ -40,7 +40,7 @@ def anesthesiologist_patient_info_page(patient_id):
 @anesthesiologist_required
 def anesthesiologist_questionnaire_page(questionnaire_id):
     questionnaire = get_questionnaire(questionnaire_id)
-    questions = get_default_questionnaire()
+    questions = get_all_flattened_questions()
     return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions, title="Questionnaire Review")
 
 '''
