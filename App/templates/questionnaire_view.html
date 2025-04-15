@@ -2,34 +2,38 @@
 {% extends "layout.html" %}
 {% block title %}Questionnaire Responses{% endblock %}
 {% block content %}
+
 <div class="row mt-5">
-    <!-- Left Card: Overall Review / Patient Info -->
+    <!-- Left Panel -->
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                {% if current_user.type == "anesthesiologist" or current_user.type == "doctor" %}
+                {% if current_user.type in ["anesthesiologist", "doctor"] %}
                     <h2 class="text-center">Review Questionnaire</h2>
                 {% elif current_user.type == "patient" %}
                     <h2 class="text-center">Questionnaire Details</h2>
                 {% endif %}
             </div>
             <div class="card-body">
-                {% if current_user.type == "anesthesiologist" or current_user.type == "doctor" %}
+                {% if current_user.type in ["anesthesiologist", "doctor"] %}
                     <form method="post" action="/dashboard/{{ current_user.type }}/questionnaire/submit/{{ questionnaire.id }}">
                         <div class="form-group">
                             <label for="reviewNotes">Review Notes:</label>
                             <textarea id="reviewNotes" name="{{ current_user.type == 'doctor' and 'doctor_notes' or 'anesthesiologist_notes' }}" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
+
                             {% if questionnaire.anesthesiologist_notes %}
                             <label for="anesthesiologistNotesDisplay" class="mt-2">Anesthesiologist's Comments:</label>
                             <textarea id="anesthesiologistNotesDisplay" class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
                             {% endif %}
                         </div>
+
                         {% if current_user.type == "doctor" %}
-                            <div class="form-group mt-2">
-                                <label for="operationDate">Select Date &amp; Time for Surgery:</label>
-                                <input type="datetime-local" id="operationDate" name="operation_date" class="form-control" required>
-                            </div>
+                        <div class="form-group mt-2">
+                            <label for="operationDate">Select Date & Time for Surgery:</label>
+                            <input type="datetime-local" id="operationDate" name="operation_date" class="form-control">
+                        </div>
                         {% endif %}
+
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="radio" id="approve" name="status" value="approved" required>
                             <label class="form-check-label" for="approve">Accept</label>
@@ -49,7 +53,8 @@
                         <p class="mt-1"><strong>Status:</strong> {{ questionnaire.status }}</p>
                         <p><strong>Operation Date:</strong> {{ questionnaire.operation_date }}</p>
                     </div>
-                    {% if questionnaire.status|lower == "declined" %}
+
+                    {% if questionnaire.status|lower == "declined" and (questionnaire.flagged_questions or questionnaire.doctor_flagged_questions) %}
                         <div class="alert alert-danger mt-2">
                             Need Attention: Your questionnaire has flagged questions that require updating.
                         </div>
@@ -59,82 +64,103 @@
             </div>
         </div>
     </div>
-    
-    <!-- Right Card: Questionnaire Display -->
+
+    <!-- Right Panel -->
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
                 <h2>Questionnaire {{ formatted_date }}</h2>
             </div>
             <div class="card-body" style="max-height: 500px; overflow-y: auto;">
-                {% if current_user.type != "patient" and questionnaire.previous_responses %}
-                <div class="alert alert-info">
+
+                {% if questionnaire.previous_responses %}
+                <div class="alert alert-info mt-4">
                     <h5>Comparison of Flagged Responses</h5>
                     <ul>
                         {% for qid, original in questionnaire.previous_responses.items() %}
-                        {% set updated = questionnaire.responses.get(qid) %}
-                        {% set question_obj = (questions | selectattr("id", "equalto", qid) | list).0 %}
-                            {% if question_obj and original != updated %}
-                                <li>
-                                    <strong>{{ question_obj.text }}</strong><br>
-                                    <em>Original Answer:</em> {{ original }}<br>
-                                    <em>Updated Answer:</em> {{ updated }}
-                                </li>
+                            {% set updated = questionnaire.responses.get(qid) %}
+                            {% set matched = (questions | selectattr("id", "equalto", qid) | list).0 %}
+                            {% set anesth_update = questionnaire.anesthesiologist_updates.get(qid) if questionnaire.anesthesiologist_updates else None %}
+                            {% set doctor_update = questionnaire.doctor_updates.get(qid) if questionnaire.doctor_updates else None %}
+                            {% if matched and updated and updated != original and (anesth_update or doctor_update) %}
+                            <li class="mb-3">
+                                {% if matched.id.endswith('a') %}
+                                    {% set parent_id = matched.id[:-1] %}
+                                    {% set parent = (questions | selectattr("id", "equalto", parent_id) | list).0 %}
+                                    {% if parent %}<strong>{{ parent.text }}</strong><br>{% endif %}
+                                    <strong>{{ matched.text }}</strong><br>
+                                {% else %}
+                                    <strong>{{ matched.text }}</strong><br>
+                                {% endif %}
+
+                                <em>Original Answer:</em> {{ original }}<br>
+
+                                {% if anesth_update %}
+                                    <em>Anesthesiologist Answer:</em> {{ anesth_update }}<br>
+                                {% endif %}
+                                {% if doctor_update %}
+                                    <em>Doctor Answer:</em> {{ doctor_update }}<br>
+                                {% endif %}
+                            </li>
                             {% endif %}
                         {% endfor %}
                     </ul>
                 </div>
                 {% endif %}
+
                 <h4>Patient Name: {{ questionnaire.patient.firstname }} {{ questionnaire.patient.lastname }}</h4>
+
                 {% for question in questions %}
-                <div class="mb-4">
-                    <p><strong>{{ question.text }}</strong></p>
-                    {% if question.type == "long_answer" %}
-                        <textarea class="form-control" readonly>{{ questionnaire.responses[question.id] }}</textarea>
-                    {% elif question.type == "multiple_choice" %}
-                        {% for choice in question.choices %}
+                    {% if not question.id.endswith('a') %}
+                    <div class="mb-4">
+                        <p><strong>{{ question.text }}</strong></p>
+                        {% if question.type == "long_answer" %}
+                            <textarea class="form-control" readonly>{{ questionnaire.responses[question.id] }}</textarea>
+                        {% elif question.type == "multiple_choice" %}
+                            {% for choice in question.choices %}
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" id="choice_{{ question.id }}_{{ loop.index }}"
-                                       name="question_{{ question.id }}" value="{{ choice }}" {% if questionnaire.responses[question.id] == choice %} checked {% endif %} disabled>
-                                <label class="form-check-label" for="choice_{{ question.id }}_{{ loop.index }}">{{ choice }}</label>
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == choice %} checked {% endif %}>
+                                <label class="form-check-label">{{ choice }}</label>
                             </div>
-                        {% endfor %}
-                    {% elif question.type == "boolean" %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="question_{{ question.id }}"
-                                   name="question_{{ question.id }}" {% if questionnaire.responses[question.id] == "yes" %} checked {% endif %} disabled>
-                            <label class="form-check-label" for="question_{{ question.id }}">Yes</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="question_{{ question.id }}"
-                                   name="question_{{ question.id }}" {% if questionnaire.responses[question.id] == "no" %} checked {% endif %} disabled>
-                            <label class="form-check-label" for="question_{{ question.id }}">No</label>
-                        </div>
-                    {% endif %}
-                    {% if question.follow_ups %}
-                        <div class="mt-3">
-                            {% for follow_up in question.follow_ups %}
-                                {% if questionnaire.responses[question.id] == follow_up.conditional_on or (follow_up.conditional_on == true and questionnaire.responses[question.id]) %}
-                                    <p><strong>{{ follow_up.text }}</strong></p>
-                                    <textarea class="form-control" readonly>{{ questionnaire.responses[follow_up.id] }}</textarea>
-                                {% endif %}
                             {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% if current_user.type == "anesthesiologist" or current_user.type == "doctor" %}
-                        <button type="button"
-                                class="btn flag-toggle btn-warning btn-sm"
-                                data-questionnaire-id="{{ questionnaire.id }}"
-                                data-question-id="{{ question.id }}">
+                        {% elif question.type == "boolean" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "yes" %} checked {% endif %}>
+                                <label class="form-check-label">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "no" %} checked {% endif %}>
+                                <label class="form-check-label">No</label>
+                            </div>
+                        {% endif %}
+
+                        {% if question.follow_ups %}
+                            <div class="mt-3">
+                                {% for follow_up in question.follow_ups %}
+                                    {% if questionnaire.responses[question.id] == follow_up.conditional_on or (follow_up.conditional_on == true and questionnaire.responses[question.id]) %}
+                                        <p><strong>{{ follow_up.text }}</strong></p>
+                                        <textarea class="form-control" readonly>{{ questionnaire.responses[follow_up.id] }}</textarea>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if current_user.type in ["anesthesiologist", "doctor"] %}
+                        <button type="button" class="btn flag-toggle btn-warning btn-sm"
+                            data-questionnaire-id="{{ questionnaire.id }}"
+                            data-question-id="{{ question.id }}"
+                            data-user-type="{{ current_user.type }}">
                             Flag
                         </button>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}
