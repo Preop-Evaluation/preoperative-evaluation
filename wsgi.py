@@ -98,21 +98,44 @@ def create_patient_command(firstname, lastname, username, password, email, phone
 @click.argument("blood_type", default="O+")
 @click.argument("weight", default=70.0)
 @click.argument("height", default=175)
+@click.argument("gender", default="Male")
 @click.argument("allergies", default="None")
 @click.argument("medical_conditions", default="None")
 @click.argument("medication", default="None")
-def create_medical_history_command(firstname, lastname, age, blood_type, weight, height, allergies, medical_conditions, medication):
+def create_medical_history_command(firstname, lastname, age, gender, blood_type, weight, height, allergies, medical_conditions, medication):
     patient = Patient.query.filter_by(firstname=firstname, lastname=lastname).first()
     
     if not patient:
         print(f"Error: Patient with name {firstname} {lastname} not found.")
         return
-    user = create_medical_history(patient.id, age, blood_type, weight, height, allergies, medical_conditions, medication)
+    user = create_medical_history(patient.id, age, gender, blood_type, weight, height, allergies, medical_conditions, medication)
     
     if user:
         print(f"Medical history for patient {patient.firstname} {patient.lastname} created!")
     else:
         print("Error creating medical history.")
+
+@patient_cli.command("display_data", help="Displays all patient data given firstname and lastname")
+@click.argument("firstname")
+@click.argument("lastname")
+def display_patient_data_command(firstname, lastname):
+    patient = Patient.query.filter_by(firstname=firstname, lastname=lastname).first()
+
+    if not patient:
+        print(f"Error: Patient with name {firstname} {lastname} not found.")
+        return
+
+    print(f"Patient Data:")
+    print(f"Name: {patient.firstname} {patient.lastname}")
+    print(f"Age: {patient.age}")
+    print(f"Gender: {patient.gender}")
+    print(f"Blood Type: {patient.blood_type}")
+    print(f"Weight: {patient.weight} kg")
+    print(f"Height: {patient.height} cm")
+    print(f"Allergies: {patient.allergies}")
+    print(f"Medical Conditions: {patient.medical_conditions}")
+    print(f"Medication: {patient.medication}")
+
 
 #command to list patients
 @patient_cli.command("list", help="Lists all patients")
