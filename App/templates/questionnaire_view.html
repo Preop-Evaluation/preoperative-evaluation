@@ -1,0 +1,173 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+{% extends "layout.html" %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <!-- Left Panel -->
+    <div class="col-md-4">
+        {% if current_user.type == "doctor" %}
+        <div class="card border-info mb-3">
+            <div class="card-header bg-info text-white">Doctor Review Panel</div>
+            <div class="card-body">
+                <form method="post" action="/dashboard/doctor/questionnaire/submit/{{ questionnaire.id }}">
+                    <div class="form-group">
+                        <label for="reviewNotes">Doctor's Notes:</label>
+                        <textarea id="reviewNotes" name="doctor_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="operationDate">Select Date & Time for Surgery:</label>
+                        <input type="datetime-local" id="operationDate" name="operation_date" class="form-control">
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved" required>
+                        <label class="form-check-label" for="approve">Accept</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined" required>
+                        <label class="form-check-label" for="decline">Decline</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+        {% elif current_user.type == "anesthesiologist" %}
+        <div class="card border-success mb-3">
+            <div class="card-header bg-success text-white">Anesthesiologist Review Panel</div>
+            <div class="card-body">
+                <form method="post" action="/dashboard/anesthesiologist/questionnaire/submit/{{ questionnaire.id }}">
+                    <div class="form-group">
+                        <label for="reviewNotes">Anesthesiologist Notes:</label>
+                        <textarea id="reviewNotes" name="anesthesiologist_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
+                    </div>
+                    {% if questionnaire.anesthesiologist_notes %}
+                    <label for="anesthesiologistNotesDisplay" class="mt-2">Previous Comments:</label>
+                    <textarea id="anesthesiologistNotesDisplay" class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
+                    {% endif %}
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved" required>
+                        <label class="form-check-label" for="approve">Accept</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined" required>
+                        <label class="form-check-label" for="decline">Decline</label>
+                    </div>
+                    <button type="submit" class="btn btn-success mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+        {% elif current_user.type == "patient" %}
+        <div class="card border-secondary mb-3">
+            <div class="card-header bg-secondary text-white">Your Questionnaire Status</div>
+            <div class="card-body">
+                <p><strong>Doctor's Notes:</strong></p>
+                <textarea class="form-control" readonly>{{ questionnaire.doctor_notes }}</textarea>
+                <p class="mt-1"><strong>Anesthesiologist's Notes:</strong></p>
+                <textarea class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
+                <p class="mt-1"><strong>Status:</strong> {{ questionnaire.status }}</p>
+                <p><strong>Operation Date:</strong> {{ questionnaire.operation_date }}</p>
+                {% if questionnaire.status|lower == "declined" and (questionnaire.flagged_questions or questionnaire.doctor_flagged_questions) %}
+                <div class="alert alert-danger mt-2">
+                    Need Attention: Your questionnaire has flagged questions that require updating.
+                </div>
+                <a href="{{ url_for('questionnaire_views.update_flagged_questionnaire', questionnaire_id=questionnaire.id) }}" class="btn btn-warning mt-2">Update Flagged Questions</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Patient Profile Card -->
+        <div class="card">
+            <div class="card-header">               
+                <h2 class="text-center">Patient Profile</h2>
+            </div>
+            <div class="card-body">                               
+                <p class="card-text"><strong>Name:</strong> {{ patient.firstname }} {{ patient.lastname }}</p>
+                <p class="card-text"><strong>Email:</strong> {{ patient.email }}</p>
+                <p class="card-text"><strong>Phone Number:</strong> {{ patient.phone_number }}</p>
+                <p class="card-text"><strong>Gender:</strong> {{ patient.gender }}</p>
+                <p class="card-text"><strong>Date of Birth </strong>(YYYY-MM-DD): {{ patient.dob }}</p>
+                <p class="card-text"><strong>Age:</strong> {{ patient.age }}</p>
+                <p class="card-text"><strong>Blood Type:</strong> {{ patient.blood_type }}</p>
+                <p class="card-text"><strong>Weight:</strong> {{ patient.weight }}</p>
+                <p class="card-text"><strong>Height:</strong> {{ patient.height }}</p>
+                <p class="card-text"><strong>Allergies:</strong> {{ patient.allergies }}</p>
+                <p class="card-text"><strong>Medical Conditions:</strong> {{ patient.medical_conditions }}</p>
+                <p class="card-text"><strong>Medication:</strong> {{ patient.medication }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2>Questionnaire {{ formatted_date }}</h2>
+            </div>
+            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                {% if current_user.type in ['doctor', 'anesthesiologist'] %}
+                <div class="card bg-info p-3 mb-4">
+                    <h5 class="fw-bold mb-3">Comparison of Flagged Updated Questions</h5>
+                    {% set shown_any = false %}
+                    {% for question in questions %}
+                        {% set qid = question.id %}
+                        {% set original = questionnaire.previous_responses.get(qid) %}
+                        {% set updated = questionnaire.responses.get(qid) %}
+                        {% set anesth_update = questionnaire.anesthesiologist_updates.get(qid) %}
+                        {% set doctor_update = questionnaire.doctor_updates.get(qid) %}
+                        {% set is_flagged = anesth_update or doctor_update %}
+                        {% set is_updated = original and updated != original %}
+                        {% if is_updated and is_flagged %}
+                            {% set shown_any = true %}
+                            <p class="fw-bold">Q{{ loop.index }}. {{ question.text }}</p>
+                            {% if original %}<p><strong>Original Answer:</strong> {{ original }}</p>{% endif %}
+                            {% if anesth_update %}<p><strong>Revised Answer from Anesthesiologist's Flag:</strong> {{ anesth_update }}</p>{% endif %}
+                            {% if doctor_update %}<p><strong>Revised Answer from Doctor's Flag:</strong> {{ doctor_update }}</p>{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <h4>Patient Name: {{ questionnaire.patient.firstname }} {{ questionnaire.patient.lastname }}</h4>
+                {% for question in questions %}
+                    {% if not question.id.endswith('a') %}
+                    <div class="mb-4">
+                        <p><strong>{{ question.text }}</strong></p>
+                        {% if question.type == "long_answer" %}
+                            <textarea class="form-control" readonly>{{ questionnaire.responses[question.id] }}</textarea>
+                        {% elif question.type == "multiple_choice" %}
+                            {% for choice in question.choices %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == choice %} checked {% endif %}>
+                                <label class="form-check-label">{{ choice }}</label>
+                            </div>
+                            {% endfor %}
+                        {% elif question.type == "boolean" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "yes" %} checked {% endif %}>
+                                <label class="form-check-label">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "no" %} checked {% endif %}>
+                                <label class="form-check-label">No</label>
+                            </div>
+                        {% endif %}
+                        {% if current_user.type in ["anesthesiologist", "doctor"] %}
+                        <button type="button" class="btn flag-toggle btn-warning btn-sm"
+                            data-questionnaire-id="{{ questionnaire.id }}"
+                            data-question-id="{{ question.id }}"
+                            data-user-type="{{ current_user.type }}">
+                            Flag
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

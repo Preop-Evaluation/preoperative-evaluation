@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Update Flagged Questions</h2>
+  <form method="post" action="{{ url_for('questionnaire_views.update_flagged_questionnaire', questionnaire_id=questionnaire.id) }}">
+    {% for question in flagged_questions %}
+      <div class="mb-3">
+        <p><strong>{{ question.text }}</strong></p>
+        {% if question.type == "boolean" %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="question_{{ question.id }}_yes" name="question_{{ question.id }}" value="yes" {% if questionnaire.responses[question.id] == "yes" %}checked{% endif %}>
+                <label class="form-check-label" for="question_{{ question.id }}_yes">Yes</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="question_{{ question.id }}_no" name="question_{{ question.id }}" value="no" {% if questionnaire.responses[question.id] == "no" %}checked{% endif %}>
+                <label class="form-check-label" for="question_{{ question.id }}_no">No</label>
+            </div>
+        {% elif question.type == "long_answer" %}
+            <textarea class="form-control" id="question_{{ question.id }}" name="question_{{ question.id }}" rows="3">{{ questionnaire.responses[question.id] }}</textarea>
+        {% endif %}
+        {% if question.follow_ups %}
+            <div class="mt-2">
+                {% for follow_up in question.follow_ups %}
+                    <p><strong>{{ follow_up.text }}</strong></p>
+                    <textarea class="form-control" id="question_{{ follow_up.id }}" name="question_{{ follow_up.id }}" rows="2">{{ questionnaire.responses[follow_up.id] }}</textarea>
+                {% endfor %}
+            </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Submit Updates</button>
+  </form>
+</div>
+{% endblock %}
