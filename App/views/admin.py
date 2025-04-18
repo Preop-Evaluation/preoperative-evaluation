@@ -7,6 +7,7 @@ from App.controllers import *
 
 admin_views = Blueprint('admin_views', __name__, template_folder='../templates', url_prefix='/admin')
 
+#displays the adimn dashboard
 @admin_views.route('/')
 def dashboard():
     doctors = Doctor.query.all()
@@ -18,9 +19,10 @@ def dashboard():
 
     return render_template('admin_dashboard.html', users=users, title= 'Admin Dashboard')
 
-
+#adds a staff member to the database given credentials
 @admin_views.route('/add_staff', methods=['GET', 'POST'])
 def add_staff():
+    #checks if request is post to update or get to display the form
     if request.method == 'POST':
         role = request.form.get('role')
         firstname = request.form.get('firstname')
@@ -30,6 +32,7 @@ def add_staff():
         phone_number = request.form.get('phone_number')
         email = request.form.get('email')
 
+        #checks the staff role to ensure the correct type is created
         if role == 'doctor':
             staff = create_doctor(firstname, lastname, username, password, email, phone_number)
         elif role == 'anesthesiologist':
@@ -46,6 +49,7 @@ def add_staff():
 
     return render_template('admin_add_staff.html', title='Add Staff')
 
+#Delets a staff memeber from the database
 @admin_views.route('/remove_staff/<username>', methods=['POST'])
 def remove_staff(username):
     if delete_doctor(username) or delete_anesthesiologist(username) or delete_patient(username):
@@ -54,17 +58,24 @@ def remove_staff(username):
         flash('User removal failed.')
     return redirect(url_for('admin_views.dashboard'))
 
+#Allows the admin to reset a staff members password
 @admin_views.route('/reset_staff_password', methods=['GET', 'POST'])
 def reset_staff_password():
+    #checks if request is post to update or get to display the form
     if request.method == 'POST':
         username = request.form.get('username')
         new_password = request.form.get('new_password')
         
+        #checks if a patient is being reset and prevents it
+        patient = Patient.query.filter_by(username=username).first()
+        if patient:
+            flash('ERROR: Can Only Reset Password for Staff')
+            return render_template('admin_reset_password.html', title='Reset Staff Password')
+        
+        #checks if the staff member exists
         user = Doctor.query.filter_by(username=username).first()
         if not user:
             user = Anesthesiologist.query.filter_by(username=username).first()
-        if not user:    
-            user = Patient.query.filter_by(username=username).first()
         if user:
             user.set_password(new_password)
             db.session.commit()
