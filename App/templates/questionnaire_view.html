@@ -12,21 +12,32 @@
             <div class="card-body">
                 <form method="post" action="/dashboard/doctor/questionnaire/submit/{{ questionnaire.id }}">
                     <div class="form-group">
+                        <div class="status_check">
+                            {% if status %}
+                            <h4>Current Status: {{status}}</h4>
+                            {% endif %}
+                        </div>
                         <label for="reviewNotes">Doctor's Notes:</label>
                         <textarea id="reviewNotes" name="doctor_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
                     </div>
                     <div class="form-group mt-2">
                         <label for="operationDate">Select Date & Time for Surgery:</label>
-                        <input type="datetime-local" id="operationDate" name="operation_date" class="form-control"  min="{{ current_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+                        <input type="datetime-local" id="operationDate" name="operation_date" class="form-control"  
+                               min="{{ current_time.strftime('%Y-%m-%dT%H:%M') }}"
+                               value="{{ operation_date if operation_date else '' }}"
+                               required>
                     </div>
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved" required>
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved"
+                               {% if status == 'approved' %}checked{% endif %} required>
                         <label class="form-check-label" for="approve">Accept</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined" required>
+                      </div>
+                      
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined"
+                               {% if status == 'declined' %}checked{% endif %} required>
                         <label class="form-check-label" for="decline">Decline</label>
-                    </div>
+                      </div>
                     <button type="submit" class="btn btn-primary mt-2">Submit</button>
                 </form>
             </div>
@@ -37,6 +48,11 @@
             <div class="card-body">
                 <form method="post" action="/dashboard/anesthesiologist/questionnaire/submit/{{ questionnaire.id }}">
                     <div class="form-group">
+                        <div class="status_check">
+                            {% if status %}
+                            <h4>Current Status: {{status}}</h4>
+                            {% endif %}
+                        </div>
                         <label for="reviewNotes">Anesthesiologist Notes:</label>
                         <textarea id="reviewNotes" name="anesthesiologist_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
                     </div>
@@ -45,13 +61,16 @@
                     <textarea id="anesthesiologistNotesDisplay" class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
                     {% endif %}
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved" required>
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved"
+                               {% if status == 'approved' %}checked{% endif %} required>
                         <label class="form-check-label" for="approve">Accept</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined" required>
+                      </div>
+                      
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined"
+                               {% if status == 'declined' %}checked{% endif %} required>
                         <label class="form-check-label" for="decline">Decline</label>
-                    </div>
+                      </div>
                     <button type="submit" class="btn btn-success mt-2">Submit</button>
                 </form>
             </div>
