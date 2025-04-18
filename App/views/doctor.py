@@ -6,12 +6,13 @@ from App.models.patient import Patient
 from App.models.anesthesiologist import Anesthesiologist
 from flask_mail import Message
 import pytz
+from datetime import date
 # from App.controllers.questions import get_all_flattened_questions
 from App.controllers import doctor_required
 
 doctor_views = Blueprint('doctor_views', __name__, template_folder='../templates')
-
-
+ 
+#displays the doctor dashboard
 @doctor_views.route('/dashboard/doctor', methods=['GET'])
 @doctor_required
 def doctor_dashboard_page():
@@ -19,14 +20,14 @@ def doctor_dashboard_page():
     patient_questionnaires = get_all_questionnaires()
     return render_template('doctor_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients, title= 'Doctor Dashboard')
 
-
+#displays the patient selected
 @doctor_views.route('/dashboard/doctor/patient/<patient_id>', methods=['GET'])
 @doctor_required
 def doctor_patient_info_page(patient_id):
     patient = get_patient_by_id(patient_id)
     return render_template('patient_info.html', patient=patient, title= 'Patient Infomation')
 
-
+#displays the questionnaire selected
 @doctor_views.route('/dashboard/doctor/questionnaire', methods=['GET'])
 @doctor_required
 def doctor_questionnaire_page():
@@ -35,9 +36,15 @@ def doctor_questionnaire_page():
     questions = get_default_questionnaire()
     patient = patient = get_patient_by_id(questionnaire.patient_id)
     current_time = datetime.now()
-    return render_template('questionnaire_view.html', current_time=current_time, questionnaire=questionnaire, patient=patient, questions=questions, title= 'Questionnaire')
+    operation_date = questionnaire.operation_date
+    #converts datetime to the correct format for the program to interpret
+    if operation_date:
+        operation_date = datetime.strptime(operation_date, "%d-%B-%Y %I:%M %p")
+        operation_date = operation_date.strftime("%Y-%m-%dT%H:%M")
+    status = questionnaire.status
+    return render_template('questionnaire_view.html', status=status, operation_date=operation_date, current_time=current_time, questionnaire=questionnaire, patient=patient, questions=questions, title= 'Questionnaire')
 
-
+#sumbits a response to a questionnaire
 @doctor_views.route('/dashboard/doctor/questionnaire/submit/<questionnaire_id>', methods=['POST'])
 @doctor_required
 def update_questionnaire_doctor_action(questionnaire_id):
@@ -49,7 +56,7 @@ def update_questionnaire_doctor_action(questionnaire_id):
     if not questionnaire:
         flash("Questionnaire not found.")
         return redirect(url_for('doctor_views.doctor_questionnaire_page', questionnaire_id=questionnaire_id))
-
+    
     if data.get('status', '').lower() == "declined":
         if not questionnaire.previous_responses:
             questionnaire.previous_responses = questionnaire.responses.copy() if questionnaire.responses else {}
@@ -67,7 +74,7 @@ def update_questionnaire_doctor_action(questionnaire_id):
             ast_tz = pytz.timezone("America/Port_of_Spain")
             current_dt = questionnaire.submitted_date.astimezone(ast_tz).strftime("%d/%m/%Y - %I:%M %p") if questionnaire.submitted_date else ""
 
-
+            #Sends an email to the patient or anesthesiologist
             msg = Message(
                 subject="Your Questionnaire Needs Attention (Doctor Review)",
                 sender=current_app.config['MAIL_USERNAME'],
@@ -103,6 +110,9 @@ def update_questionnaire_doctor_action(questionnaire_id):
         questionnaire.status = "approved"
         questionnaire.doctor_notes = notes
         questionnaire.operation_date = operation_date
+        operation_date = datetime.fromisoformat(operation_date)
+        operation_date = operation_date.strftime("%d-%B-%Y %I:%M %p")
+        questionnaire.operation_date = operation_date
         db.session.commit()
 
         patient = Patient.query.get(questionnaire.patient_id)
@@ -123,7 +133,7 @@ def update_questionnaire_doctor_action(questionnaire_id):
     flash("Review submitted successfully.")
     return redirect(url_for('doctor_views.doctor_questionnaire_page', patient=patient, current_time=current_time, questionnaire_id=questionnaire_id))
 
-
+#triggers the flagging of a question in the questionnaire
 @doctor_views.route('/dashboard/doctor/toggle_flag', methods=['POST'])
 @doctor_required
 def doctor_toggle_flag():
