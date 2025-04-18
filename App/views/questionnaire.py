@@ -1,134 +1,192 @@
-from flask import Blueprint, redirect, render_template, request, jsonify, url_for, flash, current_app
-from flask_login import current_user
-import pytz
-from App.models import db
-from App.controllers import *
-from App.controllers.questionnaire import get_questionnaire, create_questionnaire, get_latest_questionnaire
-from App.controllers.questions import get_default_questionnaire
-from App.models.anesthesiologist import Anesthesiologist
-from flask_mail import Message
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+{% extends "layout.html" %}
+{% block title %}{{title}}{% endblock %}
 
-questionnaire_views = Blueprint('questionnaire_views', __name__, template_folder='../templates')
+{% block content %}
+<div class="row mt-5">
+    <!-- Left Panel -->
+    <div class="col-md-4">
+        {% if current_user.type == "doctor" %}
+        <div class="card border-info mb-3">
+            <div class="card-header bg-info text-white">Doctor Review Panel</div>
+            <div class="card-body">
+                <form method="post" action="/dashboard/doctor/questionnaire/submit/{{ questionnaire.id }}">
+                    <div class="form-group">
+                        <div class="status_check">
+                            {% if status %}
+                            <h4>Current Status: {{status}}</h4>
+                            {% endif %}
+                        </div>
+                        <label for="reviewNotes">Doctor's Notes:</label>
+                        <textarea id="reviewNotes" name="doctor_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="operationDate">Select Date & Time for Surgery:</label>
+                        <input type="datetime-local" id="operationDate" name="operation_date" class="form-control"  
+                               min="{{ current_time.strftime('%Y-%m-%dT%H:%M') }}"
+                               value="{{ operation_date if operation_date else '' }}"
+                               required>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved"
+                               {% if status == 'approved' %}checked{% endif %} required>
+                        <label class="form-check-label" for="approve">Accept</label>
+                      </div>
+                      
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined"
+                               {% if status == 'declined' %}checked{% endif %} required>
+                        <label class="form-check-label" for="decline">Decline</label>
+                      </div>
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+        {% elif current_user.type == "anesthesiologist" %}
+        <div class="card border-success mb-3">
+            <div class="card-header bg-success text-white">Anesthesiologist Review Panel</div>
+            <div class="card-body">
+                <form method="post" action="/dashboard/anesthesiologist/questionnaire/submit/{{ questionnaire.id }}">
+                    <div class="form-group">
+                        <div class="status_check">
+                            {% if status %}
+                            <h4>Current Status: {{status}}</h4>
+                            {% endif %}
+                        </div>
+                        <label for="reviewNotes">Anesthesiologist Notes:</label>
+                        <textarea id="reviewNotes" name="anesthesiologist_notes" class="form-control" placeholder="Enter reason for decline (if any)..."></textarea>
+                    </div>
+                    {% if questionnaire.anesthesiologist_notes %}
+                    <label for="anesthesiologistNotesDisplay" class="mt-2">Previous Comments:</label>
+                    <textarea id="anesthesiologistNotesDisplay" class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
+                    {% endif %}
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" id="approve" name="status" value="approved"
+                               {% if status == 'approved' %}checked{% endif %} required>
+                        <label class="form-check-label" for="approve">Accept</label>
+                      </div>
+                      
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="decline" name="status" value="declined"
+                               {% if status == 'declined' %}checked{% endif %} required>
+                        <label class="form-check-label" for="decline">Decline</label>
+                      </div>
+                    <button type="submit" class="btn btn-success mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+        {% elif current_user.type == "patient" %}
+        <div class="card border-secondary mb-3">
+            <div class="card-header bg-secondary text-white">Your Questionnaire Status</div>
+            <div class="card-body">
+                <p><strong>Doctor's Notes:</strong></p>
+                <textarea class="form-control" readonly>{{ questionnaire.doctor_notes }}</textarea>
+                <p class="mt-1"><strong>Anesthesiologist's Notes:</strong></p>
+                <textarea class="form-control" readonly>{{ questionnaire.anesthesiologist_notes }}</textarea>
+                <p class="mt-1"><strong>Status:</strong> {{ questionnaire.status }}</p>
+                <p><strong>Operation Date:</strong> {{ questionnaire.operation_date }}</p>
+                {% if questionnaire.status|lower == "declined" and (questionnaire.flagged_questions or questionnaire.doctor_flagged_questions) %}
+                <div class="alert alert-danger mt-2">
+                    Need Attention: Your questionnaire has flagged questions that require updating.
+                </div>
+                <a href="{{ url_for('questionnaire_views.update_flagged_questionnaire', questionnaire_id=questionnaire.id) }}" class="btn btn-warning mt-2">Update Flagged Questions</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
-@questionnaire_views.route('/questionnaire', methods=['GET', 'POST'])
-@patient_required
-def questionnaire_page():
-    questions = get_default_questionnaire()
-    if current_user.med_history_updated:
-        latest_responses = None
-        if current_user.autofill_enabled:
-            latest = get_latest_questionnaire(current_user.id)
-            if latest:
-                latest_responses = latest.responses
-        return render_template('questionnaire_form.html', questions=questions, latest_responses=latest_responses, title="Questionnaire")
-    else:
-        return redirect(url_for('patient_views.patient_profile_page'))
+        <!-- Patient Profile Card -->
+        <div class="card">
+            <div class="card-header">               
+                <h2 class="text-center">Patient Profile</h2>
+            </div>
+            <div class="card-body">                               
+                <p class="card-text"><strong>Name:</strong> {{ patient.firstname }} {{ patient.lastname }}</p>
+                <p class="card-text"><strong>Email:</strong> {{ patient.email }}</p>
+                <p class="card-text"><strong>Phone Number:</strong> {{ patient.phone_number }}</p>
+                <p class="card-text"><strong>Gender:</strong> {{ patient.gender }}</p>
+                <p class="card-text"><strong>Date of Birth </strong>(YYYY-MM-DD): {{ patient.dob }}</p>
+                <p class="card-text"><strong>Age:</strong> {{ patient.age }}</p>
+                <p class="card-text"><strong>Blood Type:</strong> {{ patient.blood_type }}</p>
+                <p class="card-text"><strong>Weight:</strong> {{ patient.weight }}</p>
+                <p class="card-text"><strong>Height:</strong> {{ patient.height }}</p>
+                <p class="card-text"><strong>Allergies:</strong> {{ patient.allergies }}</p>
+                <p class="card-text"><strong>Medical Conditions:</strong> {{ patient.medical_conditions }}</p>
+                <p class="card-text"><strong>Medication:</strong> {{ patient.medication }}</p>
+            </div>
+        </div>
+    </div>
 
-@questionnaire_views.route('/questionnaire/details', methods=['GET', 'POST'])
-@patient_required
-def questionnaire_details_page():
-    questionnaire_id = request.args.get('questionnaire_id')
-    questionnaire = get_questionnaire(questionnaire_id)
-    if not questionnaire:
-        flash('Invalid questionnaire ID')
-        return redirect(url_for('questionnaire_views.questionnaire_page'))
-    questions = get_default_questionnaire()
-    formatted_date = ""
-    if questionnaire.submitted_date:
-        ast_tz = pytz.timezone("America/Port_of_Spain")
-        formatted_date = questionnaire.submitted_date.astimezone(ast_tz).strftime("%d/%m/%Y - %I:%M %p")
-    patient = patient = get_patient_by_id(questionnaire.patient_id)    
-    return render_template('questionnaire_view.html', patient=patient, questions=questions, questionnaire=questionnaire, formatted_date=formatted_date, title="Questionnaire Details")
+    <!-- Right Panel -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2>Questionnaire {{ formatted_date }}</h2>
+            </div>
+            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                {% if current_user.type in ['doctor', 'anesthesiologist'] %}
+                <div class="card bg-info p-3 mb-4">
+                    <h5 class="fw-bold mb-3">Comparison of Flagged Updated Questions</h5>
+                    {% set shown_any = false %}
+                    {% for question in questions %}
+                        {% set qid = question.id %}
+                        {% set original = questionnaire.previous_responses.get(qid) %}
+                        {% set updated = questionnaire.responses.get(qid) %}
+                        {% set anesth_update = questionnaire.anesthesiologist_updates.get(qid) %}
+                        {% set doctor_update = questionnaire.doctor_updates.get(qid) %}
+                        {% set is_flagged = anesth_update or doctor_update %}
+                        {% set is_updated = original and updated != original %}
+                        {% if is_updated and is_flagged %}
+                            {% set shown_any = true %}
+                            <p class="fw-bold">Q{{ loop.index }}. {{ question.text }}</p>
+                            {% if original %}<p><strong>Original Answer:</strong> {{ original }}</p>{% endif %}
+                            {% if anesth_update %}<p><strong>Revised Answer from Anesthesiologist's Flag:</strong> {{ anesth_update }}</p>{% endif %}
+                            {% if doctor_update %}<p><strong>Revised Answer from Doctor's Flag:</strong> {{ doctor_update }}</p>{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-@questionnaire_views.route('/submit_questionnaire', methods=['POST'])
-@patient_required
-def submit_questionnaire():
-    questions = get_default_questionnaire()
-    responses = {}
-    for key, value in request.form.items():
-        if key.startswith('question_'):
-            question_id = key.split('_')[1]
-            responses[question_id] = value
-    for question in questions:
-        if question.get('follow_ups'):
-            for follow_up in question['follow_ups']:
-                follow_up_id = 'question_' + follow_up['id']
-                if follow_up_id in request.form:
-                    responses[follow_up['id']] = request.form[follow_up_id]
-    questionnaire = create_questionnaire(patient_id=current_user.id, responses=responses)
-    patient = get_patient_by_id(current_user.id)
-    if questionnaire:
-        flash('Questionnaire submitted successfully!')
-    else:
-        flash('Error submitting questionnaire!')
-    return render_template('questionnaire_view.html', questions=questions, patient= patient, questionnaire=questionnaire, title="Questionnaire Details")
+                <h4>Patient Name: {{ questionnaire.patient.firstname }} {{ questionnaire.patient.lastname }}</h4>
+                {% for question in questions %}
+                    {% if not question.id.endswith('a') %}
+                    <div class="mb-4">
+                        <p><strong>{{ question.text }}</strong></p>
+                        {% if question.type == "long_answer" %}
+                            <textarea class="form-control" readonly>{{ questionnaire.responses[question.id] }}</textarea>
+                        {% elif question.type == "multiple_choice" %}
+                            {% for choice in question.choices %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == choice %} checked {% endif %}>
+                                <label class="form-check-label">{{ choice }}</label>
+                            </div>
+                            {% endfor %}
+                        {% elif question.type == "boolean" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "yes" %} checked {% endif %}>
+                                <label class="form-check-label">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" disabled {% if questionnaire.responses[question.id] == "no" %} checked {% endif %}>
+                                <label class="form-check-label">No</label>
+                            </div>
+                        {% endif %}
+                        {% if current_user.type in ["anesthesiologist", "doctor"] %}
+                        <button type="button" class="btn flag-toggle btn-warning btn-sm"
+                            data-questionnaire-id="{{ questionnaire.id }}"
+                            data-question-id="{{ question.id }}"
+                            data-user-type="{{ current_user.type }}">
+                            Flag
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 
-@questionnaire_views.route('/update_flagged_questionnaire/<questionnaire_id>', methods=['GET', 'POST'])
-@patient_required
-def update_flagged_questionnaire(questionnaire_id):
-    questionnaire = get_questionnaire(questionnaire_id)
-    if not questionnaire:
-        flash("Questionnaire not found.")
-        return redirect(url_for("questionnaire_views.questionnaire_page"))
-
-    flagged_ids = (questionnaire.flagged_questions or []) + (questionnaire.doctor_flagged_questions or [])
-    if questionnaire.status.lower() != "declined" or not flagged_ids:
-        flash("No flagged questions to update.")
-        return redirect(url_for("patient_views.patient_profile_page"))
-
-    questions = get_default_questionnaire()
-    flagged_questions = [q for q in questions if q["id"] in flagged_ids]
-
-    if request.method == "POST":
-        new_answers = {}
-        for question in flagged_questions:
-            qid = question["id"]
-            answer = request.form.get("question_" + qid)
-            if answer is not None:
-                new_answers[qid] = answer
-
-        if not questionnaire.previous_responses:
-            questionnaire.previous_responses = {}
-        if not questionnaire.anesthesiologist_updates:
-            questionnaire.anesthesiologist_updates = {}
-        if not questionnaire.doctor_updates:
-            questionnaire.doctor_updates = {}
-
-        for qid, answer in new_answers.items():
-            if qid not in questionnaire.previous_responses:
-                questionnaire.previous_responses[qid] = questionnaire.responses.get(qid)
-
-            if qid in (questionnaire.flagged_questions or []):
-                questionnaire.anesthesiologist_updates[qid] = answer
-            if qid in (questionnaire.doctor_flagged_questions or []):
-                questionnaire.doctor_updates[qid] = answer
-
-            questionnaire.responses[qid] = answer
-
-        questionnaire.flagged_questions = []
-        questionnaire.doctor_flagged_questions = []
-        questionnaire.status = "pending"
-        db.session.commit()
-
-        anesthesiologists = Anesthesiologist.query.all()
-        for anesth in anesthesiologists:
-            msg = Message(
-                subject=f"Patient {current_user.firstname} Updated Flagged Answers",
-                sender=current_app.config['MAIL_USERNAME'],
-                recipients=[anesth.email]
-            )
-            msg.body = (
-                f"Dear Anesthesiologist {anesth.lastname},\n\n"
-                f"Patient {current_user.firstname} {current_user.lastname} has updated the flagged answers on their questionnaire (ID: {questionnaire.id}).\n"
-                f"Please log in to review the changes.\n\n"
-                f"Regards,\nMedCareTT Team"
-            )
-            try:
-                mail.send(msg)
-            except Exception as e:
-                print("Error sending update email to anesthesiologist:", e)
-
-        flash("Your flagged questions have been updated. Your questionnaire is now pending review.")
-        return redirect(url_for("patient_views.patient_profile_page"))
-
-    return render_template("update_flagged_questionnaire.html", questionnaire=questionnaire, flagged_questions=flagged_questions, title="Update Flagged Questions")
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
