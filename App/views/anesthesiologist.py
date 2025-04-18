@@ -21,7 +21,7 @@ anesthesiologist_views = Blueprint('anesthesiologist_views', __name__, template_
 '''
 Page Routes
 '''
-
+#displays the anesthesiologist dashboard
 @anesthesiologist_views.route('/dashboard/anesthesiologist', methods=['GET'])
 @anesthesiologist_required
 def anesthesiologist_dashboard_page():
@@ -29,25 +29,27 @@ def anesthesiologist_dashboard_page():
     patient_questionnaires = get_all_questionnaires()
     return render_template('anesthesiologist_dashboard.html', patient_questionnaires=patient_questionnaires, patients=patients, title= 'Anesthesiologist Dashboard')
 
-
+#displays the selected patient
 @anesthesiologist_views.route('/dashboard/anesthesiologist/patient/<patient_id>', methods=['GET'])
 @anesthesiologist_required
 def anesthesiologist_patient_info_page(patient_id):
     patient = get_patient_by_id(patient_id)
     return render_template('patient_info.html', patient=patient, title= 'Patient Information')
 
+#displays the selected questionnaire
 @anesthesiologist_views.route('/dashboard/anesthesiologist/questionnaire/<questionnaire_id>', methods=['GET'])
 @anesthesiologist_required
 def anesthesiologist_questionnaire_page(questionnaire_id):
     questionnaire = get_questionnaire(questionnaire_id)
+    status = questionnaire.status
     questions = get_default_questionnaire()
     patient = patient = get_patient_by_id(questionnaire.patient_id)
-    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions, patient= patient, title="Questionnaire Review")
+    return render_template('questionnaire_view.html', questionnaire=questionnaire, questions=questions, patient= patient, status=status, title="Questionnaire Review")
 
 '''
 Action Routes
 '''
-
+#submits a status update to a questionnaire
 @anesthesiologist_views.route('/dashboard/anesthesiologist/questionnaire/submit/<questionnaire_id>', methods=['POST'])
 @anesthesiologist_required
 def update_questionnaire_anesthesiologist_action(questionnaire_id):
@@ -60,6 +62,7 @@ def update_questionnaire_anesthesiologist_action(questionnaire_id):
         flash("Questionnaire not found.")
         return redirect(url_for('anesthesiologist_views.anesthesiologist_questionnaire_page', questionnaire_id=questionnaire_id))
     
+    #sets the status to declined in the backend and emails the patient
     if status.lower() == "declined":
         if not questionnaire.previous_responses:
             questionnaire.previous_responses = questionnaire.responses.copy() if questionnaire.responses else {}
@@ -97,7 +100,7 @@ def update_questionnaire_anesthesiologist_action(questionnaire_id):
     flash("Review submitted successfully.")
     return redirect(url_for('anesthesiologist_views.anesthesiologist_questionnaire_page', questionnaire_id=questionnaire_id))
 
-
+#triggers the toggling of a flag
 @anesthesiologist_views.route('/dashboard/anesthesiologist/toggle_flag', methods=['POST'])
 @anesthesiologist_required
 def toggle_flag():
