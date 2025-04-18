@@ -34,7 +34,8 @@ def doctor_questionnaire_page():
     questionnaire = get_questionnaire(questionnaire_id)
     questions = get_default_questionnaire()
     patient = patient = get_patient_by_id(questionnaire.patient_id)
-    return render_template('questionnaire_view.html', questionnaire=questionnaire, patient=patient, questions=questions, title= 'Questionnaire')
+    current_time = datetime.now()
+    return render_template('questionnaire_view.html', current_time=current_time, questionnaire=questionnaire, patient=patient, questions=questions, title= 'Questionnaire')
 
 
 @doctor_views.route('/dashboard/doctor/questionnaire/submit/<questionnaire_id>', methods=['POST'])
@@ -118,9 +119,9 @@ def update_questionnaire_doctor_action(questionnaire_id):
                 f"Regards,\nDr. {current_user.lastname}"
             )
             mail.send(msg)
-
+    current_time = datetime.now()
     flash("Review submitted successfully.")
-    return redirect(url_for('doctor_views.doctor_questionnaire_page', patient=patient, questionnaire_id=questionnaire_id))
+    return redirect(url_for('doctor_views.doctor_questionnaire_page', patient=patient, current_time=current_time, questionnaire_id=questionnaire_id))
 
 
 @doctor_views.route('/dashboard/doctor/toggle_flag', methods=['POST'])
