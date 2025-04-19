@@ -24,7 +24,6 @@ In a real world use case, the mail_username and mail_password fields would be re
 
 
 ENVIRONMENT VARIABLES: 
-
 See Trello's readme.txt
 
 
