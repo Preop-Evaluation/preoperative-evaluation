@@ -25,32 +25,7 @@ In a real world use case, the mail_username and mail_password fields would be re
 
 ENVIRONMENT VARIABLES: 
 
-ENV
-PRODUCTION
-
-
-JWT_ACCESS_TOKEN_EXPIRES
-7
-
-
-MAIL_SERVER
-smtp.gmail.com
-
-
-MAIL_USERNAME
-preopassessmentteam@gmail.com
-
-
-MAIL_PASSWORD
-rxzd fvjr nlmy xrbv
-
-
-SECRET_KEY
-SECRET_KEY
-
-
-SQLALCHEMY_DATABASE_URI
-sqlite:///temp-database.db
+See Trello's readme.txt
 
 
 
